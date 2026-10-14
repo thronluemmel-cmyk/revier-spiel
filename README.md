@@ -1,4 +1,8 @@
-# REVIER – Deine Wildnis · Waldklang 0.9
+# REVIER – Deine Wildnis · Bilderlexikon 0.10
+
+## Neu in 0.10
+
+Alle 136 Artenkarten haben Bilder. Insgesamt 190 lokale Abbildungen: 136 Artansichten und 54 Zusatzbilder mit Pflanzenmerkmalen, Trittsiegeln, Fraßspuren und Kopfschmuck. 18 Tierarten haben eigene Spurenbilder. Alle Bilder lassen sich vergrößern. Im Karteneditor kannst du eigene Bilder hinzufügen, entfernen und beschriften; Export/Import enthält auch die eigenen Bilder. Musik und Waldgeräusche aus 0.9 bleiben enthalten. Bedienung: [docs/LERNKARTEN.md](docs/LERNKARTEN.md). Bildrechte: [docs/BILDNACHWEISE.md](docs/BILDNACHWEISE.md).
 
 ## Neu in 0.9
 

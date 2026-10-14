@@ -56,3 +56,23 @@ Bestehende Landschaftsspielstände bleiben mit dem bisherigen Format kompatibel.
 ## Prüfung dieser Version
 
 Im Chromium-Browser geprüft: Laden aller 136 Karten, Suche und Kategorien, Textkorrektur mit Neuladen, Einzel- und Gesamtschalter, Originalwiederherstellung, Export/Import, Ablehnung ungültiger Importdateien, Schutz ungespeicherter Änderungen, leere Kartenliste, Quizfilterung und bestehende Landschaftsspeicherung. Desktopansicht und 390 Pixel breite Ansicht visuell geprüft. Kein Test auf einem physischen iPhone/Safari.
+
+## Bilder bearbeiten (ab 0.10)
+
+Jede der 136 Karten enthält mindestens eine Artabbildung. Insgesamt sind 190 Bilder enthalten, darunter Spurenbilder für 18 Tierarten. Bei vielen Pflanzen kommen Früchte, Zapfen oder botanische Detailtafeln hinzu. Ausgewählte Säugetiere haben zusätzliche Spurenbilder; bei Horn- und Geweihträgern zeigen Artansichten oder Zusatzfotos den Kopfschmuck. Noch nicht für jede Tierart ist ein eigenes Trittsiegel enthalten. Auch bei Pflanzen sind nicht durchgehend alle Entwicklungsstadien abgebildet.
+
+Bilder auf einer Lernkarte antippen, um sie zu vergrößern. Die Quellen- und Lizenzangaben stehen unter jedem Bild; vollständige Nachweise enthält BILDNACHWEISE.md. Die Abbildungen sind nicht maßstabsgleich. Spuren auf Schnee, Sand und Schlamm können sehr verschieden aussehen; einzelne Abdrücke erlauben nicht immer eine sichere Artbestimmung.
+
+Unter **Lernkarten-Einstellungen → Karte auswählen → Bilder dieser Karte**:
+
+1. Eigene JPG-, PNG- oder WebP-Bilder auswählen (je Datei höchstens 15 MB; höchstens acht Bilder pro Karte).
+2. Bildbeschreibung, Urheber und gegebenenfalls Quellenlink eintragen. Die Quellenangaben mitgelieferter Bilder bleiben erhalten; ihre Beschreibung kann geändert werden.
+3. **Änderungen speichern** drücken. Bilder lassen sich auch entfernen. **Mitgelieferte Bilder wiederherstellen** setzt die Bildauswahl zurück; anschließend speichern.
+
+**Original wiederherstellen** setzt nur den Lerntext und die Aktivierung zurück. Die Bilder werden mit ihrem eigenen Wiederherstellungsknopf zurückgesetzt.
+
+Eigene Bilder werden zum Speichern auf höchstens 1400 Pixel Kantenlänge verkleinert und als JPEG gespeichert. Transparente Flächen erhalten einen weißen Hintergrund. Die Originaldatei auf deinem Gerät wird nicht verändert.
+
+**Export** enthält gespeicherte Texte, Einstellungen und eigene Bilder zusammen in einer JSON-Datei. Vor dem Export die Karte speichern. **Import** übernimmt die Sicherung auch in einem anderen Browser. Alte Sicherungen ohne Bilddaten bleiben lesbar und verändern die vorhandenen Bilder nicht. Die Sicherung ergänzt den separaten Landschafts-Spielstand.
+
+Eigene Bilder und Änderungen werden lokal im Browser gespeichert, nicht automatisch zwischen Geräten synchronisiert. Vor einem Browserwechsel, Löschen der Browserdaten oder Umzug der Spieladresse exportieren. Ohne verfügbaren Bildspeicher bleiben mitgelieferte Bilder sichtbar, eigene Uploads sind dann deaktiviert. Auf dem iPhone die gehostete Spieladresse in Safari öffnen; die Vorschau einer ZIP-Datei in der Dateien-App führt das Spiel nicht zuverlässig aus. Die mobile Gestaltung wurde in Chromium bei 390 Pixel Breite geprüft, nicht auf einem echten iPhone.

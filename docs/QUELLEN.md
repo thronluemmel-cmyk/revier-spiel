@@ -20,3 +20,11 @@ Die Texte sind eigenständig formulierte kompakte Lernhilfen. Die Links auf den 
 - Habicht unter dem in vielen Lehrwerken verwendeten Namen Accipiter gentilis: https://ornithologie-hamburg.de/45-vogelarten/greifvoegel/237-habicht-accipiter-gentilis
 
 Eigene Korrekturen können auf jeder Karte mitsamt einem präziseren Quellenlink gespeichert werden.
+
+## Bilder-Update 0.10
+
+Einzelbildnachweise mit Urhebern und Lizenzen: [BILDNACHWEISE.md](BILDNACHWEISE.md). Grundlage der Zuordnung sind die jeweiligen Originalbeschreibungen; Suchtreffer wurden nicht ungeprüft übernommen.
+
+- Rehbock, Gehörn aus Knochensubstanz: https://www.jagdverband.de/zahlen-fakten/tiersteckbriefe/reh-capreolus-capreolus
+- Damwild, Schaufelgeweih: https://www.jagdverband.de/zahlen-fakten/tiersteckbriefe/damwild-dama-dama
+- Fährten und Einfluss des Untergrunds: https://www.waldwissen.net/de/lebensraum-wald/tiere-im-wald/die-kunst-des-faehrtenlesens
