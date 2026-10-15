@@ -13,15 +13,20 @@ function capacities(tiles){const c={};for(const t of tiles)c[t]=(c[t]||0)+1;cons
 function reconcile(s){const caps=capacities(s.tiles);for(const a of species)if(caps[a.kind]===0)s.populations[a.kind]=0;
  if(s.event){s.event.remaining=Math.min(s.event.remaining,s.populations[s.event.kind]);if(!s.event.remaining)s.event=null}return caps;
 }
-function advance(s){const caps=capacities(s.tiles);s.month++;
- for(const a of species){const k=a.kind,n=s.populations[k],target=caps[k];if(!target){s.populations[k]=0;continue}if(s.event?.kind===k)continue;
- if(n<target)s.populations[k]=Math.min(target,n+Math.max(1,Math.ceil((target-n)/4)));
- else if(n>target)s.populations[k]=Math.max(target,n-1);
+function advance(s){const caps=capacities(s.tiles);s.month++;s.growthCredit||=empty();
+ for(const a of species){const k=a.kind,n=s.populations[k],target=caps[k];if(!target){s.populations[k]=0;s.growthCredit[k]=0;continue}if(s.event?.kind===k)continue;
+ if(n<target){s.growthCredit[k]+=Math.min(2,Math.max(1,Math.ceil((target-n)/4))*.5);const add=Math.floor(s.growthCredit[k]);s.growthCredit[k]-=add;s.populations[k]=Math.min(target,n+add);}
+ else {s.growthCredit[k]=0;if(n>target)s.populations[k]=Math.max(target,n-1);}
  }
- if(!s.event&&s.month>=s.nextEventMonth){const candidates=species.filter(a=>a.hunt&&caps[a.kind]>=3&&s.populations[a.kind]>=2);if(candidates.length){const a=candidates[Math.floor(s.month/6)%candidates.length],surplus=1+(Math.floor(s.month/6)%3);s.populations[a.kind]=caps[a.kind]+surplus;s.event={kind:a.kind,remaining:surplus};}s.nextEventMonth=s.month+6;}
+ if(!s.event&&s.month>=s.nextEventMonth){
+ const over=species.filter(a=>a.hunt&&caps[a.kind]>0&&s.populations[a.kind]>caps[a.kind]);
+ const settled=species.filter(a=>a.hunt&&caps[a.kind]>=3&&s.populations[a.kind]===caps[a.kind]);
+ const candidates=over.length?over:settled;
+ if(candidates.length){const a=candidates[Math.floor(s.month/6)%candidates.length];if(!over.length)s.populations[a.kind]++;s.event={kind:a.kind,remaining:s.populations[a.kind]-caps[a.kind]};}
+ s.nextEventMonth=s.month+6;}
  reconcile(s);return s.event;
 }
 function take(s,kind){if(!s.event||s.event.kind!==kind||s.event.remaining<=0||s.populations[kind]<=0)return false;s.populations[kind]--;s.event.remaining--;if(!s.event.remaining)s.event=null;return true}
-function valid(s){return s&&s.version===2&&s.populations&&species.every(a=>Number.isInteger(s.populations[a.kind])&&s.populations[a.kind]>=0&&s.populations[a.kind]<=100)&&Number.isInteger(s.nextEventMonth)&&s.nextEventMonth>=0&&s.nextEventMonth<=100010&&(s.event===null||(s.event&&byKind[s.event.kind]?.hunt&&Number.isInteger(s.event.remaining)&&s.event.remaining>0&&s.event.remaining<=s.populations[s.event.kind]))}
+function valid(s){return s&&[2,3].includes(s.version)&&s.populations&&species.every(a=>Number.isInteger(s.populations[a.kind])&&s.populations[a.kind]>=0&&s.populations[a.kind]<=100)&&Number.isInteger(s.nextEventMonth)&&s.nextEventMonth>=0&&s.nextEventMonth<=100010&&(s.event===null||(s.event&&byKind[s.event.kind]?.hunt&&Number.isInteger(s.event.remaining)&&s.event.remaining>0&&s.event.remaining<=s.populations[s.event.kind]))}
 window.RevierEcology={species,byKind,empty,capacities,reconcile,advance,take,valid};
 })();
