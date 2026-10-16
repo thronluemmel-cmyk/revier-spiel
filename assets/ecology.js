@@ -51,7 +51,7 @@ function locations(s,kind){const h=habitat(s);if(h.locations[kind])return h.loca
  if(ok)result.push(i);
  }h.locations[kind]=result;return result;
 }
-function populationFactor(s){return Math.max(1,Math.min(10,(s.populationPercent||10)/10));}
+function populationFactor(s){return 2*Math.max(1,Math.min(10,(s.populationPercent||10)/10));}
 function capacities(s){
  const h=habitat(s),f=h.forestHa,o=h.openHa,c=h.hedgeHa,w=h.waterHa;
  const winter=[0,1,11].includes(s.month%12),foodSeason=winter?.78:1;
@@ -91,7 +91,7 @@ function advance(s){
  s.lossCredit[k]+=n*p.loss/12+(n>target?Math.max(.35,(n-target)*.3):0);
  const lost=Math.min(n,Math.floor(s.lossCredit[k]));s.lossCredit[k]-=Math.floor(s.lossCredit[k]);n-=lost;report.departures+=lost;
  if(!target){s.growthCredit[k]=0;s.birthCredit[k]=0;s.populations[k]=n;continue;}
- const birthMonth=p.birth.includes(s.month%12),limit=Math.min(1000,Math.ceil(target*1.15));
+ const birthMonth=p.birth.includes(s.month%12),limit=Math.min(2000,Math.ceil(target*1.15));
  if(birthMonth&&n>=2&&n<limit){s.birthCredit[k]+=n*p.recruit/p.birth.length;const born=Math.min(Math.ceil(2*factor),Math.floor(s.birthCredit[k]),limit-n);s.birthCredit[k]-=Math.floor(s.birthCredit[k]);n+=born;report.births+=born;report.birthsByKind[k]=born;}
  else if(n<2||n>=limit)s.birthCredit[k]=0;
  if(n<target){const credit=s.growthCredit[k]+p.arrival*factor,arrived=Math.min(Math.floor(credit+1e-5),arrivalBudget,target-n);n+=arrived;arrivalBudget-=arrived;report.arrivals+=arrived;s.growthCredit[k]=Math.min(.999999,Math.max(0,credit-arrived));}
@@ -104,6 +104,6 @@ function advance(s){
  return report;
 }
 function take(s,kind){if(!byKind[kind]||s.populations[kind]<=0)return false;s.populations[kind]--;if(s.event?.kind===kind){s.event.remaining--;if(!s.event.remaining)s.event=null;}return true;}
-function valid(s){return s&&[2,3,4,5].includes(s.version)&&s.populations&&species.every(a=>Number.isInteger(s.populations[a.kind])&&s.populations[a.kind]>=0&&s.populations[a.kind]<=1000)&&Number.isInteger(s.nextEventMonth)&&s.nextEventMonth>=0&&s.nextEventMonth<=100010&&(s.event===null||(s.event&&byKind[s.event.kind]?.hunt&&Number.isInteger(s.event.remaining)&&s.event.remaining>0&&s.event.remaining<=s.populations[s.event.kind]));}
+function valid(s){return s&&[2,3,4,5].includes(s.version)&&s.populations&&species.every(a=>Number.isInteger(s.populations[a.kind])&&s.populations[a.kind]>=0&&s.populations[a.kind]<=2000)&&Number.isInteger(s.nextEventMonth)&&s.nextEventMonth>=0&&s.nextEventMonth<=100010&&(s.event===null||(s.event&&byKind[s.event.kind]?.hunt&&Number.isInteger(s.event.remaining)&&s.event.remaining>0&&s.event.remaining<=s.populations[s.event.kind]));}
 window.RevierEcology={species,byKind,empty,capacities,reconcile,advance,take,valid,habitat,locations,invalidate,normalizeLegacy,TILE_HA,profiles,populationFactor};
 })();
