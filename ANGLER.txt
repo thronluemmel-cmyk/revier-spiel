@@ -1,0 +1,13 @@
+# Fishay Predator Cup – private Zugangsliste
+# Format: Name | Passwort
+# Chris: aktualisierter Zugang. Andere Zeilen aus dem bisherigen Paket übernommen.
+# Bei weiteren Änderungen stets die aktuelle private GitHub-Datei beibehalten.
+# Erlaubt: 5–128 Zeichen. Keine | im Passwort verwenden.
+# Leeres Passwort deaktiviert den Zugang; Zeile löschen sperrt ihn ebenfalls.
+# Bestehende Namen nicht umbenennen, damit die Zuordnung erhalten bleibt.
+# Nur in einem PRIVATEN Repository speichern!
+
+Chris | 59414
+Daniel | 63924
+Hendrik | 81536
+Roman | 29748

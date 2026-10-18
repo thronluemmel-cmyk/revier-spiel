@@ -1,78 +1,49 @@
-# REVIER – Deine Wildnis · Wildtierwelt 0.11
+# Fishay Predator Cup 1.6.1
 
-Kleinere Karte, leerer Start, 14 lebensraumabhängige Tierarten und Bestandsaufträge mit Zielvisier und Lernkartenfenster. Die zehn neuen Tierarten haben eigene Spielbilder. Alle Tiere werden ausschließlich oberhalb der Karte angezeigt.
+Update einer bestehenden Installation: **UPDATE-1.6.1.md** lesen. Neu: optionale Anmeldung für 30 Tage auf diesem Gerät, einschließlich Speicherung in der Handy-Hülle.
 
-- **Start:** Ordner vollständig entpacken und index.html öffnen; alternativ auf GitHub Pages hochladen.
-- **GitHub:** [UPLOAD.md](UPLOAD.md) erklärt die Upload-Schritte mit maximal 80 Dateien je Ordner.
-- **Spiel:** [docs/UPDATE-0.11.md](docs/UPDATE-0.11.md) erklärt Lebensräume, Tiere, Bestandswarnungen und das Speichern.
-- **Lernkarten:** [docs/LERNKARTEN.md](docs/LERNKARTEN.md), mit 136 Karten und 190 Bildern.
-- **Musik:** [docs/WALDKLANG.md](docs/WALDKLANG.md).
-- **Bildrechte:** [docs/BILDNACHWEISE.md](docs/BILDNACHWEISE.md).
+Mobile Angelcup-App mit Google Sheets, Drive-Fotos und einer vom Veranstalter gepflegten Zugangsliste.
 
-Neue Landschaften starten ohne Tiere und Bäume. Vorhandene Spielstände bleiben erhalten; **Neue Landschaft** beginnt leer. Die Karte umfasst 212 × 212 Felder, rund 50 % der bisherigen Fläche. Speicherung vorerst lokal im Browser, zusätzlich Export/Import; keine Servernummer.
+**Start: [START-HIER.md](START-HIER.md)**
 
-## Frühere Versionen und Grafikherstellung
+Neu: installierbare Handy-Hülle mit FISHAY-Symbol, Installationsanleitung für iPhone/Android und teilbarem Installationslink. Anschließend **[APP-INSTALLIEREN.md](APP-INSTALLIEREN.md)** befolgen. Nur `pwa-public` wird in ein separates öffentliches Pages-Repository kopiert; dieses vollständige Projekt bleibt privat. Live-Installation und Google-Foto-Upload sind bis zur Einrichtung noch nicht verifiziert.
 
+## Zugang
 
-## Neu in 0.10
+`ANGLER.txt` enthält pro Zeile `Name | Passwort`. Vier Namen mit fünfstelligen Beispielpasswörtern sind vorbereitet; vor echtem Betrieb längere eigene Passwörter einsetzen. Die Datei muss in einem privaten GitHub-Repository liegen. Der Apps-Script-Server liest sie über einen nur lesenden, separat gespeicherten GitHub-Token. Keine Selbstregistrierung, keine E-Mail-Adresse, kein Mailversand.
 
-Alle 136 Artenkarten haben Bilder. Insgesamt 190 lokale Abbildungen: 136 Artansichten und 54 Zusatzbilder mit Pflanzenmerkmalen, Trittsiegeln, Fraßspuren und Kopfschmuck. 18 Tierarten haben eigene Spurenbilder. Alle Bilder lassen sich vergrößern. Im Karteneditor kannst du eigene Bilder hinzufügen, entfernen und beschriften; Export/Import enthält auch die eigenen Bilder. Musik und Waldgeräusche aus 0.9 bleiben enthalten. Bedienung: [docs/LERNKARTEN.md](docs/LERNKARTEN.md). Bildrechte: [docs/BILDNACHWEISE.md](docs/BILDNACHWEISE.md).
+Ab 2027 wird ein Saisonteilnehmer erst beim ersten gespeicherten Fang mit Foto angelegt. Zugänge bleiben saisonübergreifend gültig, solange der Veranstalter sie nicht entfernt. 2026 bleiben die vier Angler und bisherigen Tabellenfänge erhalten; neue Fänge samt Foto können sofort über die App hinzukommen.
 
-## Neu in 0.9
+## Dateien
 
-Eigene ruhige Musik im klassischen Stil und synthetische Waldgeräusche. Beide Spuren sind standardmäßig eingeschaltet und einzeln abschaltbar. Musik-, Wald- und Gesamtlautstärke können getrennt eingestellt werden. Der Ton startet nach der ersten Bedienung oder über **Ton starten**; Einstellungen bleiben auf dem Gerät gespeichert. Details: [docs/WALDKLANG.md](docs/WALDKLANG.md).
+- `ANGLER.txt`: Zugangsliste. Nicht öffentlich machen.
+- `src/Code.js`: Backend, GitHub-Lesen, Login, Sessions, Tabellen- und Fotozugriffe.
+- `src/Model.js`: Punkte, Bestandsadapter, Eingabeprüfung und Zugangsliste-Parser.
+- `src/Index.html`: Oberfläche mit Name/Passwort-Anmeldung.
+- `tests/`: Tests ohne externe Zugriffe oder Paketinstallation.
+- `Vorschau.html`: lokale, eingefrorene Vorschau, mit klar markiertem Demo-Login und ausschließlich den Beispielpasswörtern.
 
-## Neu in 0.8
+```sh
+npm run check
+npm test
+```
 
-136 ausgearbeitete Artenkarten mit Suche und sieben Kategorien. Unter **Spielmodus → Lernkarten-Einstellungen** lassen sich Karten einzeln oder zusammen aktivieren/deaktivieren sowie Namen, Lerntexte und Quellen bearbeiten. Eigene Texte bleiben nach dem Neuladen erhalten. Export/Import sichert die Lernkarteneinstellungen separat vom Landschaftsspielstand.
+## Grenzen und Sicherheit
 
-Die genaue Bedienung und der Umfang stehen in [docs/LERNKARTEN.md](docs/LERNKARTEN.md). Alle Dateien des Ordners gemeinsam verwenden; die Bilder aus 0.7 sind enthalten.
+Name und Passwort bleiben im privaten Repository sichtbar, einschließlich Git-Verlauf. Nur der Veranstalter und vertrauenswürdige Verwalter dürfen es lesen. Script-Editoren sind Administratoren; das Projekt deshalb eigenständig und privat betreiben. Die privaten Skripteigenschaften enthalten den GitHub-Token, nicht der Quellcode. Die App lehnt öffentliche Repositories ab und folgt beim authentifizierten GitHub-Abruf keinen Weiterleitungen.
 
-Statisches 2D-Browserspiel für GitHub Pages. Kein Backend, keine Installation von Node oder PHP nötig.
+Passwortprüfung und Zugriffskontrolle erfolgen serverseitig. Sitzungen laufen nach sieben Tagen ab. Der Server prüft bei jedem geschützten Aufruf die aktuelle Liste und die Passwortversion; entfernte oder geänderte Zugänge können vorhandene Sitzungen nicht weiterverwenden. Bis zu zehn Fehlversuche je bekanntem Namen/Stunde, maximal 200 Anmeldeversuche insgesamt/Stunde. Es gibt keine Passwort-Rücksetzung per E-Mail; der Veranstalter ersetzt das Passwort in der Datei. Der Browser speichert nur den Sitzungstoken pro Tab.
 
-## Online stellen mit GitHub Pages
+GitHub-Ausfälle oder abgelaufene Tokens sperren Schreibzugriffe; das Liveboard bleibt unabhängig lesbar. Teilnehmernamen sind dauerhafte Schlüssel (ohne Unterscheidung der Groß-/Kleinschreibung). Umbenennungen müssen separat migriert werden. Archivdaten werden durch die Zugangsliste nicht gelöscht.
 
-1. Kostenlos bei https://github.com anmelden.
-2. Rechts oben **+ → New repository** wählen, Namen `revier-spiel` vergeben, **Public** auswählen und **Create repository** klicken.
-3. Auf der Repository-Seite **Add file → Upload files** klicken.
-4. **Den INHALT dieses entpackten Ordners** hochladen: `index.html`, `assets/` und optional `README.md`. Wichtig: `index.html` muss im Stammverzeichnis des Repositorys liegen, nicht in einem Unterordner.
-5. Mit **Commit changes** bestätigen.
-6. **Settings → Pages → Build and deployment → Source: Deploy from a branch** einstellen, **Branch: main**, Ordner **/(root)** wählen und **Save** klicken.
-7. Nach der Bereitstellung wird die Spieladresse unter **Settings → Pages** angezeigt, normalerweise `https://BENUTZERNAME.github.io/revier-spiel/`.
-8. Diese URL in Shopify als externen Menülink hinterlegen (je nach Shopify-Oberfläche unter **Inhalt → Menüs** oder **Onlineshop → Navigation**).
+Ein Script-Lock serialisiert Mutationen, Anfrage-IDs machen Fangmeldungen wiederholbar. Eine persistierte Fangzeile ist der Commit-Punkt. Erst danach entstehen Teilnehmer und persönliche Ansicht. Scheitert dieser Folgeschritt, kann dieselbe Anfrage die Zuordnung nachholen, ohne ein weiteres Foto anzulegen. Drive und Sheets bieten keine gemeinsame Transaktion; ein Fehler vor der Fangzeile kann eine unreferenzierte Bilddatei hinterlassen. Diese nicht automatisch löschen, wenn der Schreibstatus unklar ist. Abgeleitete Ansichten können nachsynchronisiert werden.
 
-## Lokal testen
+Die 2026-Daten werden live aus `Turnier!A1:H42` gelesen; Namen/Fischarten und Positionen werden geprüft. Die vorhandene Tabelle enthält nur aktuelle Fangplätze, keine vollständige historische Meldeliste oder Fotos.
 
-`index.html` im Browser öffnen. Falls der Browser lokale Dateien einschränkt, in diesem Ordner `python3 -m http.server 8000` ausführen und `http://localhost:8000` öffnen.
+## Technische Dokumentation
 
-## Spielen
+- [Apps Script Web Apps](https://developers.google.com/apps-script/guides/web)
+- [HTML-Service und Serverfunktionen](https://developers.google.com/apps-script/guides/html/communication)
+- [GitHub Repository Contents API](https://docs.github.com/en/rest/repos/contents)
 
-- 300 × 300 Felder, Zoom und Verschieben.
-- Landschaft malen, Monate/Jahre fortschalten, Tiere beobachten.
-- Jagdschein-Lernmodus abschaltbar (Kindermodus).
-- Spielstände werden im Browser gespeichert; Export/Import als JSON möglich.
-
-## Hinweise
-
-- Spielstände sind pro Browser und Domain gespeichert. Ein Umzug von WordPress zu GitHub Pages übernimmt sie nicht automatisch: auf der alten Seite exportieren und auf der neuen importieren.
-- Das Wildtiermodell und die Lerninhalte sind ein Prototyp und ersetzen keine offiziellen Jagdschein-Lernunterlagen.
-- GitHub Pages ist für öffentlich erreichbare statische Dateien; keine Geheimnisse oder Zugangsdaten hochladen.
-
-
-## Grafik-Update 0.6
-Die Karte verwendet nun zusätzliche deterministische 2D-Naturdetails (Gras, Blüten, Bodenstrukturen, Wasserreflexe, Wege, Schneeakzente). Keine externen Bilddateien erforderlich. Die 300×300-Welt bleibt bearbeitbar und auf GitHub Pages hostbar. Die Grafik ist stilisiert und kein fotorealistisches 3D-Spiel.
-
-
-## Grafikedition 0.7
-- 16 KI-erzeugte Bildmotive in zwei transparenten Grafikdateien: 12 Naturmotive und 4 Wildtiere.
-- Eiche, Birke, Fichte, Herbstlaub und Winterbäume; Hecken, Totholz mit Pilzen, Blumen, Schilf, Felsen und Getreide.
-- Rehbock, Feldhase, Rotfuchs und Wildschwein als bewegte Bildfiguren (noch keine einzelnen Laufphasen).
-- Tiefensortierung der Objekte, zwischengespeicherter Boden, neue Werkzeugbilder und mobile Kartenansicht vor den Werkzeugen.
-- Vorhandenes Speicherformat und 300×300-Welt bleiben erhalten. Die Grafikdateien müssen im Ordner assets/art mit hochgeladen werden.
-- Fuchs und Wildschwein dienen wie zuvor als illustrative Beobachtungen; eigene Populationsmodelle gibt es weiterhin nur für Reh und Hase.
-- Technische Prüfung: JavaScript-Syntax, Canvas-Rendering mit geladenen Bildern, Monatswechsel, Zoom, Malen, Speichern/Laden, Kindermodus. Kein vollständiger Browser-/iPhone-Test in dieser Umgebung möglich.
-
-## Bildherstellung
-Erstellt mit der integrierten Bildgenerierung. Dateien: assets/art/woodland.png und assets/art/wildlife.png.
-Prompt Natur: Transparentes 4×3-Spriteatlas, naturalistisch handgemalte 2D-Spielgrafik in leicht erhöhter Dreiviertelansicht; grüne Eiche, Fichte, Herbsteiche, Wintereiche, Hecke, moosiger Baumstamm mit Pilzen, Wiesenblumen, Schilf, Felsen, Birke, Schneefichte, Getreide; isolierte vollständige Motive ohne Text.
-Prompt Wildtiere: Transparentes 2×2-Spriteatlas; Rehbock mit kurzem Gehörn, Feldhase, Rotfuchs und Wildschwein; vollständige Körper, Blick nach rechts, leicht erhöhte Dreiviertelansicht, naturalistische Fellzeichnung, gleiche Beleuchtung, ohne Text und Landschaft.
+GitHub speichert den Code; Apps Script führt diese App aus. GitHub Pages allein führt dieses Backend nicht aus. Für clasp kann lokal eine ignorierte `.clasp.json` mit dem eigenen `scriptId` und `rootDir: "src"` eingerichtet werden.

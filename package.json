@@ -1,0 +1,13 @@
+{
+  "name": "fishy-predator-cup",
+  "version": "1.6.1",
+  "private": true,
+  "description": "Saisonbasierte Angelcup-Web-App mit Google Sheets und Drive",
+  "scripts": {
+    "test": "node --test tests/*.test.cjs",
+    "check": "node --check src/Code.js && node --check src/Model.js && node tests/check-html.cjs"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
