@@ -66,10 +66,24 @@ function sprite(atlas,col,row,x,y,w,h,flip=false){
 // Cache small, season-tinted tree sprites once instead of filtering a large atlas
 // hundreds of times during every pan frame.
 const treeSprites=new Map();
+// Keep the central tree, not the detached fragments belonging to adjacent atlas cells.
+// Runs once per cached species/season, not on every animation frame.
+function cleanTreeSprite(tile){
+ const c=tile.getContext('2d'),w=tile.width,h=tile.height,im=c.getImageData(0,0,w,h),p=im.data,labels=new Int32Array(w*h),queue=new Int32Array(w*h);let largest=0,best=0,label=0;
+ for(let start=0;start<w*h;start++){
+  if(labels[start]||p[start*4+3]<20)continue;label++;let head=0,tail=1;queue[0]=start;labels[start]=label;
+  while(head<tail){const i=queue[head++],x=i%w,y=Math.floor(i/w);for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++){if(!dx&&!dy)continue;const xx=x+dx,yy=y+dy;if(xx<0||yy<0||xx>=w||yy>=h)continue;const j=yy*w+xx;if(!labels[j]&&p[j*4+3]>=20){labels[j]=label;queue[tail++]=j;}}}
+  if(tail>largest){largest=tail;best=label;}
+ }
+ if(!best)return;
+ // A two-pixel fringe keeps antialiased leaves around the connected silhouette.
+ const keep=new Uint8Array(w*h);for(let i=0;i<w*h;i++)if(labels[i]===best){const x=i%w,y=Math.floor(i/w);for(let dy=-2;dy<=2;dy++)for(let dx=-2;dx<=2;dx++){const xx=x+dx,yy=y+dy;if(xx>=0&&yy>=0&&xx<w&&yy<h)keep[yy*w+xx]=1;}}
+ for(let i=0;i<w*h;i++)if(!keep[i])p[i*4+3]=0;c.putImageData(im,0,0);
+}
 function treeSprite(t,season,x,y,w,h,flip){
  const im=art[t.atlas];if(!im?.complete||!im.naturalWidth)return false;
  const key=t.id+':'+season;let tile=treeSprites.get(key);
- if(!tile){tile=document.createElement('canvas');tile.width=192;tile.height=192;const c=tile.getContext('2d'),cols=t.atlas==='trees-b'?4:3,rows=t.atlas==='trees-a'?3:2,sw=im.naturalWidth/cols,sh=im.naturalHeight/rows,scale=Math.min(192/sw,192/sh);if(season===0&&(t.type==='deciduous'||t.id==='lärche'))c.filter='saturate(.8) brightness(1.14)';if(season===2&&(t.type==='deciduous'||t.id==='lärche'))c.filter='sepia(.65) saturate(1.4)';if(season===3)c.filter='saturate(.35) brightness(1.15)';c.drawImage(im,t.col*sw,t.row*sh,sw,sh,(192-sw*scale)/2,192-sh*scale,sw*scale,sh*scale);c.filter='none';if(season===3&&(t.type==='deciduous'||t.id==='lärche'))world.bareTree(c,t.id);c.globalCompositeOperation='source-atop';const light=c.createLinearGradient(0,0,192,192);light.addColorStop(0,'#fff3c52b');light.addColorStop(.4,'#ffffff00');light.addColorStop(1,'#102f375c');c.fillStyle=light;c.fillRect(0,0,192,192);c.globalCompositeOperation='source-over';treeSprites.set(key,tile);}
+ if(!tile){tile=document.createElement('canvas');tile.width=192;tile.height=192;const c=tile.getContext('2d'),cols=t.atlas==='trees-b'?4:3,rows=t.atlas==='trees-a'?3:2,sw=im.naturalWidth/cols,sh=im.naturalHeight/rows,scale=Math.min(192/sw,192/sh);if(season===0&&(t.type==='deciduous'||t.id==='lärche'))c.filter='saturate(.8) brightness(1.14)';if(season===2&&(t.type==='deciduous'||t.id==='lärche'))c.filter='sepia(.65) saturate(1.4)';if(season===3)c.filter='saturate(.35) brightness(1.15)';c.drawImage(im,t.col*sw,t.row*sh,sw,sh,(192-sw*scale)/2,192-sh*scale,sw*scale,sh*scale);c.filter='none';cleanTreeSprite(tile);if(season===3&&(t.type==='deciduous'||t.id==='lärche'))world.bareTree(c,t.id);c.globalCompositeOperation='source-atop';const light=c.createLinearGradient(0,0,192,192);light.addColorStop(0,'#fff3c52b');light.addColorStop(.4,'#ffffff00');light.addColorStop(1,'#102f375c');c.fillStyle=light;c.fillRect(0,0,192,192);c.globalCompositeOperation='source-over';treeSprites.set(key,tile);}
  const size=Math.min(w,h);ctx.save();ctx.translate(x,y);if(flip)ctx.scale(-1,1);ctx.drawImage(tile,-size/2,-size,size,size);ctx.restore();return true;
 }
 function queueDraw(){if(framePending)return;framePending=true;requestAnimationFrame(()=>{framePending=false;draw();});}
@@ -84,7 +98,7 @@ function draw(){
  ctx.clearRect(0,0,V,V);
  for(let y=sy;y<ey;y++)for(let x=sx;x<ex;x++){
  const i=y*N+x,type=state.tiles[i],px=(x-viewX)*size,py=(y-viewY)*size;
- ctx.fillStyle=colorFor(['hedge','flowers','deadwood'].includes(type)?'meadow':type,season);ctx.fillRect(px,py,size+.7,size+.7);
+ ctx.fillStyle=colorFor(['hedge','flowers','deadwood','deciduous','conifer'].includes(type)?'meadow':type,season);ctx.fillRect(px,py,size+.7,size+.7);
  terrainDetail(type,px,py,size,i,season);
  // Quiet irregular ground shading; no visible tile outlines.
  ctx.fillStyle='rgba(26,50,28,'+(hash(i)*.045)+')';ctx.fillRect(px,py,size+.3,size+.3);
