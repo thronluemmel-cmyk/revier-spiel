@@ -15,7 +15,7 @@ function migrate(s){
 function valid(s){return eco.valid(s)&&Number.isInteger(s.month)&&s.month>=0&&s.month<=100000&&Array.isArray(s.tiles)&&s.tiles.length===AREA&&s.tiles.every(t=>!!byId[t])&&[4,5].includes(s.version)&&Array.isArray(s.trees)&&s.trees.length===AREA&&s.trees.every((id,i)=>['deciduous','conifer'].includes(s.tiles[i])?trees.byId[id]?.type===s.tiles[i]:id===null)&&s.harvest&&eco.species.every(a=>Number.isSafeInteger(s.harvest[a.kind])&&s.harvest[a.kind]>=0)&&s.growthCredit&&eco.species.every(a=>Number.isFinite(s.growthCredit[a.kind])&&s.growthCredit[a.kind]>=0&&s.growthCredit[a.kind]<1)&&['birthCredit','lossCredit'].every(key=>s[key]&&eco.species.every(a=>Number.isFinite(s[key][a.kind])&&s[key][a.kind]>=0&&s[key][a.kind]<1))&&Number.isSafeInteger(s.nextAnimalId)&&s.nextAnimalId>0&&Array.isArray(s.animals)&&s.animals.length<=28000&&new Set(s.animals.map(a=>a.id)).size===s.animals.length&&s.animals.every(a=>Number.isSafeInteger(a.id)&&a.id>0&&a.id<s.nextAnimalId&&eco.byKind[a.kind]&&Number.isFinite(a.x)&&a.x>=.5&&a.x<N&&Number.isFinite(a.y)&&a.y>=.5&&a.y<N&&Number.isFinite(a.phase)&&(!a.flee||['x','y','dx','dy','left','top','right','bottom'].every(k=>Number.isFinite(a.flee[k])&&Math.abs(a.flee[k])<1000)))&&(s.version===4||(Number.isInteger(s.populationPercent)&&s.populationPercent>=10&&s.populationPercent<=100&&visitors.valid(s)&&s.animals.every(a=>hunt.valid(a,s.month))))}
 try{let v=migrate(JSON.parse(localStorage.getItem(KEY)));state=valid(v)?v:fresh()}catch{state=fresh()}
 const canvas=$('map'),ctx=canvas.getContext('2d');const V=canvas.width;let decorations=[];function hash(i){let x=Math.sin(i*94.12+5.1)*47453.5;return x-Math.floor(x)}
-let animationTime=0,framePending=false;
+let animationTime=0,framePending=false;const locomotion=new Map();
 function colorFor(type,season){const colors={meadow:['#b2c982','#8fb86d','#bdab72','#c8c6b9'],flowers:['#a9ca80','#8fbf70','#bfae76','#c9c7b7'],deciduous:['#7e9363','#617647','#92774b','#b9b6aa'],conifer:['#677d55','#4d6346','#5c6847','#667b70'],water:['#65b5c8','#438db5','#528fae','#8caeb9'],field:['#b9b47d','#c6ac65','#aa8d57','#c1bcb0'],mountain:['#979e94','#919a91','#99938b','#b8b8b5'],hedge:['#6e9c5e','#4b8951','#8d7847','#a4aaa0'],wetland:['#79a999','#6c9c89','#9b9980','#b4bbb6'],path:['#b8a27b','#b49a6e','#a68e6b','#b3aca0'],deadwood:['#8e9b72','#7e966b','#a58c69','#b5b2a5']};return (colors[type]||colors.meadow)[season]}
 function disk(x,y,r,c){ctx.fillStyle=c;ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx.fill()}
 function tree(px,py,size,type,i,season){let x=px+size*.52,y=py+size*.62,r=size*.35;ctx.fillStyle='rgba(21,39,22,.19)';ctx.beginPath();ctx.ellipse(x+r*.25,y+r*.4,r*.82,r*.42,-.2,0,7);ctx.fill();ctx.fillStyle='#68523b';ctx.fillRect(x-r*.12,y-r*.05,r*.24,r*.62);if(type==='conifer'){for(let k=0;k<3;k++){let yy=y-r*.95+k*r*.35,rr=r*(.53+k*.22);ctx.fillStyle=['#234d3b','#2b6749','#3b7950'][k];ctx.beginPath();ctx.moveTo(x,yy-r*.8);ctx.lineTo(x-rr,yy+r*.65);ctx.lineTo(x+rr,yy+r*.65);ctx.fill()}if(season===3){ctx.strokeStyle='#dce6e4';ctx.lineWidth=Math.max(1,size*.045);ctx.beginPath();ctx.moveTo(x,y-r*1.15);ctx.lineTo(x-r*.48,y-r*.2);ctx.moveTo(x,y-r*.95);ctx.lineTo(x+r*.4,y+r*.06);ctx.stroke()}}else{let leaves=season===2?['#b87837','#d39a4b','#8e7337']:season===3?['#aeb7ad','#d1d4cc','#9fa9a1']:season===0?['#6da85c','#8fc375','#508c4d']:['#387a40','#50994a','#2c673b'];for(let k=0;k<5;k++){let angle=k*Math.PI*2/5;disk(x+Math.cos(angle)*r*.48,y-r*.62+Math.sin(angle)*r*.4,r*.48,leaves[k%3])}disk(x,y-r*.65,r*.6,leaves[1])}}
@@ -132,18 +132,17 @@ function draw(){
  ctx.clearRect(0,0,V,V);ctx.drawImage(groundCache,0,0);
  drawnActors=[];
  for(const a of actors){
- const phase=animationTime*(a.flee?.0018:.00018)+a.phase;let wx=a.flee?a.flee.x:a.x+Math.sin(phase)*.25,wy=a.flee?a.flee.y:a.y+Math.cos(phase*.7)*.2;
- if(!a.flee&&!a.allowed.has(Math.floor(wy)*N+Math.floor(wx))){wx=a.x;wy=a.y;}
+ const motion=locomotion.get(a.id);const phase=(motion?.phase||a.phase);let wx=a.flee?a.flee.x:a.x,wy=a.flee?a.flee.y:a.y;
  if(wx<viewX-2||wx>viewX+visible+2||wy<viewY-2||wy>viewY+visible+2)continue;
 
- drawnActors.push({kind:a.kind,wx,wy,x:(wx-viewX)*size,y:(wy-viewY)*size,flip:a.flee?a.flee.dx<0:Math.cos(phase)<0,actor:a});
+ drawnActors.push({kind:a.kind,wx,wy,x:(wx-viewX)*size,y:(wy-viewY)*size,flip:a.flee?a.flee.dx<0:(motion?.dx||1)<0,phase,moving:!!a.flee||!!motion?.moving,actor:a});
  }
  drawnActors.sort((a,b)=>a.y-b.y);
  const people=visitors.positions(state),layers=sceneryBands.map(b=>({depth:b.depth,paint:()=>ctx.drawImage(b.image,0,b.top)}));
  // Safety circles lie on the ground; people themselves share the scene depth.
  if(hunting)for(const p of people){const x=(p.x-viewX)*size,y=(p.y-viewY)*size;ctx.save();ctx.strokeStyle='#bb593688';ctx.fillStyle='#eaa14c0b';ctx.lineWidth=1.5;ctx.setLineDash([6,6]);ctx.beginPath();ctx.arc(x,y,size*10,0,Math.PI*2);ctx.fill();ctx.stroke();ctx.restore();}
  for(const o of drawnActors){const extra=EXTRA_BY_ID[o.kind],c=extra?[extra[4],extra[5]]:{deer:[0,0],hare:[1,0],fox:[0,1],boar:[1,1]}[o.kind];const m=['hare','eichhornchen','stockente'].includes(o.kind)?.8:1.1;o.w=size*m;o.h=size*m;
-  layers.push({depth:o.y,paint:()=>{groundShadow(o.x,o.y,size*m*.38);if(!sprite(extra?'wildlife-more':'wildlife',...c,o.x,o.y,o.w,o.h,o.flip))animalSprite(o.x,o.y,size*.35,o.kind);if(hunting&&state.event?.kind===o.kind){ctx.strokeStyle='#f4d77d';ctx.lineWidth=2;ctx.beginPath();ctx.ellipse(o.x,o.y-size*.35,size*.55,size*.55,0,0,Math.PI*2);ctx.stroke();}}});
+  layers.push({depth:o.y,paint:()=>{groundShadow(o.x,o.y,size*m*.38);if(!window.RevierAnimalMotion.draw(ctx,art[extra?'wildlife-more':'wildlife'],o.kind,...c,!!extra,o.x,o.y,o.w,o.h,o.flip,o.phase,o.moving,!!o.actor.flee))animalSprite(o.x,o.y,size*.35,o.kind);if(hunting&&state.event?.kind===o.kind){ctx.strokeStyle='#f4d77d';ctx.lineWidth=2;ctx.beginPath();ctx.ellipse(o.x,o.y-size*.35,size*.55,size*.55,0,0,Math.PI*2);ctx.stroke();}}});
  }
  for(const p of people)if(p.x>=viewX-1&&p.x<=viewX+visible+1&&p.y>=viewY-1&&p.y<=viewY+visible+1)layers.push({depth:(p.y-viewY)*size,paint:()=>drawPerson(p,size)});
  layers.sort((a,b)=>a.depth-b.depth);for(const layer of layers)layer.paint();
@@ -175,7 +174,24 @@ function populateActors(report=null){
 
 let mapVisible=true;new IntersectionObserver(entries=>{mapVisible=entries[0].isIntersecting}).observe(canvas);
 let lastFrame=0;
-function animate(t){const seconds=lastFrame?Math.min(.25,(t-lastFrame)/1000):0;lastFrame=t;animationTime=t;if(!painting&&!panStart&&mapVisible&&document.visibilityState==='visible'&&!$('hunt-result').open&&!$('month-dialog').open&&(actors.length||hunting||state.walkers.length)){visitors.step(state,seconds);stepFlight(seconds);draw();}setTimeout(()=>requestAnimationFrame(animate),100)}requestAnimationFrame(animate);
+function animate(t){const seconds=lastFrame?Math.min(.25,(t-lastFrame)/1000):0;lastFrame=t;animationTime=t;if(!painting&&!panStart&&mapVisible&&document.visibilityState==='visible'&&!$('hunt-result').open&&!$('month-dialog').open&&(actors.length||hunting||state.walkers.length)){visitors.step(state,seconds);stepAnimals(seconds);stepFlight(seconds);draw();}setTimeout(()=>requestAnimationFrame(animate),33)}requestAnimationFrame(animate);
+function stepAnimals(seconds){
+ const originals=new Map(state.animals.map(a=>[a.id,a]));
+ for(const a of actors){const original=originals.get(a.id);if(!original)continue;
+  let m=locomotion.get(a.id);if(!m||m.original!==original){m={original,phase:a.phase,wait:hash(a.id+32)*1.4,dx:hash(a.id+8)>.5?1:-1,moving:false,target:null,turn:0};locomotion.set(a.id,m);}
+  if(a.flee){m.phase+=seconds*15;m.moving=true;continue;}
+  if(m.wait>0){m.wait-=seconds;m.moving=false;continue;}
+  if(m.target&&!a.allowed.has(Math.floor(m.target.y)*N+Math.floor(m.target.x)))m.target=null;
+  if(!m.target){const x=Math.floor(a.x),y=Math.floor(a.y),choices=[];for(const [dx,dy] of [[1,0],[-1,0],[0,1],[0,-1],[1,1],[1,-1],[-1,1],[-1,-1]]){const nx=x+dx,ny=y+dy;if(nx<0||ny<0||nx>=N||ny>=N||!a.allowed.has(ny*N+nx))continue;if(dx&&dy&&(!a.allowed.has(y*N+nx)||!a.allowed.has(ny*N+x)))continue;choices.push({x:nx+.5,y:ny+.5});}
+   if(!choices.length){m.wait=1;m.moving=false;continue;}m.target=choices[Math.floor(hash(a.id*17+(m.turn++)*53)*choices.length)];
+  }
+  const dx=m.target.x-a.x,dy=m.target.y-a.y,distance=Math.hypot(dx,dy),speed=['hare','eichhornchen'].includes(a.kind)?.8:['stockente','graureiher'].includes(a.kind)?.32:.48,travel=Math.min(distance,seconds*speed);
+  if(distance>.001){a.x+=dx/distance*travel;a.y+=dy/distance*travel;original.x=a.x;original.y=a.y;if(Math.abs(dx)>.01)m.dx=dx;m.phase+=travel*10;m.moving=true;}
+  if(distance<=travel+.001){m.target=null;m.wait=hash(a.id+m.turn*31)>.6?.4+hash(a.id+m.turn*73)*2:0;}
+ }
+ for(const [id,m] of locomotion)if(originals.get(id)!==m.original)locomotion.delete(id);
+}
+
 function clampView(){let visible=V/(S*zoom);viewX=Math.max(0,Math.min(N-visible,viewX));viewY=Math.max(0,Math.min(N-visible,viewY))}
 function changeZoom(factor){const old=V/(S*zoom);zoom=Math.max(.2,Math.min(4,zoom*factor));const now=V/(S*zoom);viewX+=(old-now)/2;viewY+=(old-now)/2;clampView();draw();updateView()}
 function updateView(){$('zoomlevel').textContent=Math.round(zoom*100)+' %';$('coords').textContent=`Ausschnitt: ${Math.floor(viewX)+1}, ${Math.floor(viewY)+1} · ${(Math.pow(V/(S*zoom),2)*eco.TILE_HA).toFixed(1)} ha`}
