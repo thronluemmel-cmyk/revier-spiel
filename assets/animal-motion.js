@@ -9,12 +9,13 @@ const configs={
 };
 const cache=new Map(),SIZE=160,FRAMES=16;
 const smooth=n=>{n=Math.max(0,Math.min(1,n));return n*n*(3-2*n)};
-function tile(image,kind,col,row,more){let item=cache.get(kind);if(item&&item.image===image)return item;
+function tile(image,kind,col,row,more,grid=null){const key=kind+(grid?':'+grid.tag:'');let item=cache.get(key);if(item&&item.image===image)return item;
  if(!image?.complete||!image.naturalWidth)return null;
- const xs=more?[0,430,835,1175,1655,1984].map(x=>x*image.naturalWidth/1984):[0,768,1536],ys=more?[0,445*image.naturalHeight/784,image.naturalHeight]:[0,512,1024];
+ const xs=grid?Array.from({length:grid.cols+1},(_,i)=>i*image.naturalWidth/grid.cols):more?[0,430,835,1175,1655,1984].map(x=>x*image.naturalWidth/1984):[0,768,1536],ys=grid?Array.from({length:grid.rows+1},(_,i)=>i*image.naturalHeight/grid.rows):more?[0,445*image.naturalHeight/784,image.naturalHeight]:[0,512,1024];
+ if(grid?.bounds){const b=grid.bounds.map(v=>v*image.naturalWidth/1254);xs[col]=b[0];xs[col+1]=b[2];ys[row]=b[1];ys[row+1]=b[3];}
  const sw=xs[col+1]-xs[col],sh=ys[row+1]-ys[row],scale=Math.min(SIZE/sw,SIZE/sh),w=sw*scale,h=sh*scale;
  const canvas=document.createElement('canvas');canvas.width=SIZE;canvas.height=SIZE;const c=canvas.getContext('2d',{willReadFrequently:true});c.drawImage(image,xs[col],ys[row],sw,sh,(SIZE-w)/2,SIZE-h,w,h);
- item={image,canvas,pixels:c.getImageData(0,0,SIZE,SIZE),poses:new Map()};cache.set(kind,item);return item;
+ item={image,canvas,pixels:c.getImageData(0,0,SIZE,SIZE),poses:new Map()};cache.set(key,item);return item;
 }
 function pose(item,kind,frame,running){
  const key=frame+(running?FRAMES:0);if(item.poses.has(key))return item.poses.get(key);
@@ -30,14 +31,15 @@ function pose(item,kind,frame,running){
  }
  c.putImageData(out,0,0);item.poses.set(key,canvas);return canvas;
 }
-function draw(c,image,kind,col,row,more,x,y,w,h,flip,phase,moving,running,behavior='roam',water=false){
- const item=tile(image,kind,col,row,more);if(!item)return false;
+function draw(c,image,kind,col,row,more,x,y,w,h,flip,phase,moving,running,behavior='roam',water=false,appearance=null){
+ const variant=appearance?.graphic;if(variant&&appearance.art[variant.atlas]?.naturalWidth){image=appearance.art[variant.atlas];col=variant.col;row=variant.row;more=false;}
+ const item=tile(image,kind,col,row,more,variant&&image===appearance.art[variant.atlas]?variant:null);if(!item)return false;
  const cfg=configs[kind],frame=((Math.floor(phase/(Math.PI*2)*FRAMES)%FRAMES)+FRAMES)%FRAMES;
  const picture=moving?pose(item,kind,frame,running):item.canvas;
  const bounce=moving?(cfg.hop?-Math.max(0,Math.sin(phase))*h*(running?.045:.022):Math.sin(phase*2)*h*.005):0;
  const swimming=water&&['stockente','biber','fischotter'].includes(kind);
  if(swimming){c.save();c.strokeStyle='#c5e2ddaa';c.lineWidth=1.2;c.beginPath();c.ellipse(x,y-h*.12,w*.38,h*.09,0,0,Math.PI*2);c.stroke();c.restore();}
- c.save();c.translate(x,y+bounce);if(flip)c.scale(-1,1);if(swimming){c.beginPath();c.rect(-w,-h,w*2,h);c.clip();c.drawImage(picture,-w/2,-h*.82,w,h);}else{if(behavior==='feed'&&!moving){c.translate(0,-h*.5);c.rotate(.055+Math.sin(phase)*.018);c.translate(0,h*.5);}c.drawImage(picture,-w/2,-h,w,h);}c.restore();return true;
+ c.save();if(appearance?.coat&&appearance.coat!=='none')c.filter=appearance.coat;c.translate(x,y+bounce);if(flip)c.scale(-1,1);if(swimming){c.beginPath();c.rect(-w,-h,w*2,h);c.clip();c.drawImage(picture,-w/2,-h*.82,w,h);}else{if(behavior==='feed'&&!moving){c.translate(0,-h*.5);c.rotate(.055+Math.sin(phase)*.018);c.translate(0,h*.5);}c.drawImage(picture,-w/2,-h,w,h);}c.restore();return true;
 }
 window.RevierAnimalMotion={draw,configs};
 })();
