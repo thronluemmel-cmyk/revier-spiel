@@ -56,7 +56,8 @@ function capacities(s){
  const h=habitat(s),f=h.forestHa,o=h.openHa,c=h.hedgeHa,w=h.waterHa;
  const winter=[0,1,11].includes(s.month%12),foodSeason=winter?.78:1;
  const diversity=Math.min(1,Object.keys(h.treeCounts).length/5),connected=.45+.55*Math.min(1,h.largestForest/Math.max(1,f*.35));
- const quality=(.55+.25*diversity+.2*Math.min(1,(h.flowersHa+c+h.edgeHa*.1)/Math.max(1,f*.1)))*connected;
+ let ageQuality=1;if(window.RevierWorld){window.RevierWorld.ensure(s);let sum=0,count=0;for(let i=0;i<s.trees.length;i++)if(s.trees[i]){sum+=.35+.65*window.RevierWorld.maturity(s,i);count++;}if(count)ageQuality=sum/count;}
+ const quality=(.55+.25*diversity+.2*Math.min(1,(h.flowersHa+c+h.edgeHa*.1)/Math.max(1,f*.1)))*connected*ageQuality;
  const cap=(n,max=60)=>Math.floor(Math.max(0,Math.min(max,Math.floor(n+1e-8)))*populationFactor(s));
  const deerFood=f*quality+o*.65+c*2;
  const pasture=Math.min(o,f*2+c*20+h.fieldHa*2);
@@ -65,12 +66,12 @@ function capacities(s){
  deer:cap(deerFood*.08*foodSeason,36),
  hare:cap(pasture*.19*(.5+.5*Math.min(1,(c+h.flowersHa)/Math.max(1,o*.06)))*foodSeason,60),
  fox:cap(prey*.008,6),
- boar:cap(f*(.012+.028*Math.min(1,(h.mastHa+h.fieldHa*.4)/Math.max(1,f)))*connected*foodSeason,18),
+ boar:cap(f*ageQuality*(.012+.028*Math.min(1,(h.mastHa+h.fieldHa*.4)/Math.max(1,f)))*connected*foodSeason,18),
  rotwild:h.largestForest>=20&&o>=5?cap(Math.min(f+o,o*12)*.015*foodSeason,8):0,
  damwild:h.largestForest>=10&&o>=3?cap(Math.min(h.deciduousHa+o,o*10)*.02*foodSeason,10):0,
  dachs:cap((h.deciduousHa+c)*.012*Math.min(1,(o+h.deadwoodHa*5+f*.2)/10),6),
  waschbaer:cap(Math.min(h.deciduousHa*.03,w*.15,h.woodBankKm*3),8),
- eichhornchen:cap(f*(.035+.065*Math.min(1,h.seedHa/Math.max(1,f)))*connected,45),
+ eichhornchen:cap(f*ageQuality*(.035+.065*Math.min(1,h.seedHa/Math.max(1,f)))*connected,45),
  biber:h.largestWater>=.3?cap(Math.min(h.softBankKm*4,w*.6),6):0,
  fischotter:h.largestWater>=5?cap(Math.min(w*.04,h.woodBankKm*2),2):0,
  stockente:h.largestWater>=.1?cap(w*.18*(.6+.4*Math.min(1,(h.wetlandHa+h.woodBankKm)/Math.max(1,w*.1)))*(winter?.65:1),24):0,
