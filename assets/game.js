@@ -12,7 +12,7 @@ function migrate(s){
  s={version:2,month:s.month,tiles,populations:{...eco.empty(),deer:Math.min(100,Math.round(s.deer)),hare:Math.min(100,Math.round(s.hares))},event:null,nextEventMonth:s.month+6};
  }if(s&&s.version===2&&Array.isArray(s.tiles)){s={...s,version:3,trees:s.tiles.map(t=>t==='deciduous'?'eiche':t==='conifer'?'fichte':null),animals:[],nextAnimalId:1,harvest:eco.empty(),growthCredit:eco.empty()};}if(s&&s.version===3){s={...s,version:4,birthCredit:eco.empty(),lossCredit:eco.empty(),growthCredit:eco.empty()};if(valid(s)){migrationRemoved=eco.normalizeLegacy(s);}}if(s&&s.version===4&&valid(s)){s={...s,version:5,populationPercent:10,walkers:[]};s.animals.forEach(a=>hunt.assign(a,s.month));}return s;
 }
-function valid(s){return eco.valid(s)&&Number.isInteger(s.month)&&s.month>=0&&s.month<=100000&&Array.isArray(s.tiles)&&s.tiles.length===AREA&&s.tiles.every(t=>!!byId[t])&&[4,5].includes(s.version)&&Array.isArray(s.trees)&&s.trees.length===AREA&&s.trees.every((id,i)=>['deciduous','conifer'].includes(s.tiles[i])?trees.byId[id]?.type===s.tiles[i]:id===null)&&s.harvest&&eco.species.every(a=>Number.isSafeInteger(s.harvest[a.kind])&&s.harvest[a.kind]>=0)&&s.growthCredit&&eco.species.every(a=>Number.isFinite(s.growthCredit[a.kind])&&s.growthCredit[a.kind]>=0&&s.growthCredit[a.kind]<1)&&['birthCredit','lossCredit'].every(key=>s[key]&&eco.species.every(a=>Number.isFinite(s[key][a.kind])&&s[key][a.kind]>=0&&s[key][a.kind]<1))&&Number.isSafeInteger(s.nextAnimalId)&&s.nextAnimalId>0&&Array.isArray(s.animals)&&s.animals.length<=28000&&new Set(s.animals.map(a=>a.id)).size===s.animals.length&&s.animals.every(a=>Number.isSafeInteger(a.id)&&a.id>0&&a.id<s.nextAnimalId&&eco.byKind[a.kind]&&Number.isFinite(a.x)&&a.x>=.5&&a.x<N&&Number.isFinite(a.y)&&a.y>=.5&&a.y<N&&Number.isFinite(a.phase))&&(s.version===4||(Number.isInteger(s.populationPercent)&&s.populationPercent>=10&&s.populationPercent<=100&&visitors.valid(s)&&s.animals.every(a=>hunt.valid(a,s.month))))}
+function valid(s){return eco.valid(s)&&Number.isInteger(s.month)&&s.month>=0&&s.month<=100000&&Array.isArray(s.tiles)&&s.tiles.length===AREA&&s.tiles.every(t=>!!byId[t])&&[4,5].includes(s.version)&&Array.isArray(s.trees)&&s.trees.length===AREA&&s.trees.every((id,i)=>['deciduous','conifer'].includes(s.tiles[i])?trees.byId[id]?.type===s.tiles[i]:id===null)&&s.harvest&&eco.species.every(a=>Number.isSafeInteger(s.harvest[a.kind])&&s.harvest[a.kind]>=0)&&s.growthCredit&&eco.species.every(a=>Number.isFinite(s.growthCredit[a.kind])&&s.growthCredit[a.kind]>=0&&s.growthCredit[a.kind]<1)&&['birthCredit','lossCredit'].every(key=>s[key]&&eco.species.every(a=>Number.isFinite(s[key][a.kind])&&s[key][a.kind]>=0&&s[key][a.kind]<1))&&Number.isSafeInteger(s.nextAnimalId)&&s.nextAnimalId>0&&Array.isArray(s.animals)&&s.animals.length<=28000&&new Set(s.animals.map(a=>a.id)).size===s.animals.length&&s.animals.every(a=>Number.isSafeInteger(a.id)&&a.id>0&&a.id<s.nextAnimalId&&eco.byKind[a.kind]&&Number.isFinite(a.x)&&a.x>=.5&&a.x<N&&Number.isFinite(a.y)&&a.y>=.5&&a.y<N&&Number.isFinite(a.phase)&&(!a.flee||['x','y','dx','dy','left','top','right','bottom'].every(k=>Number.isFinite(a.flee[k])&&Math.abs(a.flee[k])<1000)))&&(s.version===4||(Number.isInteger(s.populationPercent)&&s.populationPercent>=10&&s.populationPercent<=100&&visitors.valid(s)&&s.animals.every(a=>hunt.valid(a,s.month))))}
 try{let v=migrate(JSON.parse(localStorage.getItem(KEY)));state=valid(v)?v:fresh()}catch{state=fresh()}
 const canvas=$('map'),ctx=canvas.getContext('2d');const V=canvas.width;let decorations=[];function hash(i){let x=Math.sin(i*94.12+5.1)*47453.5;return x-Math.floor(x)}
 let animationTime=0,framePending=false;
@@ -117,11 +117,11 @@ function draw(){
  }else{ctx.clearRect(0,0,V,V);ctx.drawImage(sceneCache,0,0)}
  drawnActors=[];
  for(const a of actors){
- const phase=animationTime*.00018+a.phase;let wx=a.x+Math.sin(phase)*.25,wy=a.y+Math.cos(phase*.7)*.2;
- if(!a.allowed.has(Math.floor(wy)*N+Math.floor(wx))){wx=a.x;wy=a.y;}
+ const phase=animationTime*(a.flee?.0018:.00018)+a.phase;let wx=a.flee?a.flee.x:a.x+Math.sin(phase)*.25,wy=a.flee?a.flee.y:a.y+Math.cos(phase*.7)*.2;
+ if(!a.flee&&!a.allowed.has(Math.floor(wy)*N+Math.floor(wx))){wx=a.x;wy=a.y;}
  if(wx<viewX-2||wx>viewX+visible+2||wy<viewY-2||wy>viewY+visible+2)continue;
 
- drawnActors.push({kind:a.kind,wx,wy,x:(wx-viewX)*size,y:(wy-viewY)*size,flip:Math.cos(phase)<0,actor:a});
+ drawnActors.push({kind:a.kind,wx,wy,x:(wx-viewX)*size,y:(wy-viewY)*size,flip:a.flee?a.flee.dx<0:Math.cos(phase)<0,actor:a});
  }
  drawnActors.sort((a,b)=>a.y-b.y);
  for(const o of drawnActors){const extra=EXTRA_BY_ID[o.kind],c=extra?[extra[4],extra[5]]:{deer:[0,0],hare:[1,0],fox:[0,1],boar:[1,1]}[o.kind];const m=['hare','eichhornchen','stockente'].includes(o.kind)?.85:1.25;
@@ -151,14 +151,14 @@ function populateActors(report=null){
  for(const spec of eco.species){const locations=eco.locations(state,spec.kind),allowed=new Set(locations);if(!locations.length)continue;
  const existing=state.animals.filter(a=>a.kind===spec.kind).slice(0,state.populations[spec.kind]);
  while(existing.length<state.populations[spec.kind]){const id=state.nextAnimalId++;existing.push({id,kind:spec.kind,x:-1,y:-1,phase:hash(id+81)*6.28});const newborn=report&&report.birthsByKind[spec.kind]>0;hunt.assign(existing[existing.length-1],state.month,newborn);if(newborn)report.birthsByKind[spec.kind]--;}
- for(const a of existing){hunt.assign(a,state.month);if(!allowed.has(Math.floor(a.y)*N+Math.floor(a.x))){let i=locations[Math.floor(hash(a.id*317)*locations.length)];for(let attempt=0;attempt<8;attempt++){const candidate=locations[Math.floor(hash(a.id*317+attempt*43)*locations.length)];if(!kept.some(b=>Math.hypot(b.x-(candidate%N+.5),b.y-(Math.floor(candidate/N)+.5))<1.2)){i=candidate;break;}}a.x=i%N+.5;a.y=Math.floor(i/N)+.5;}kept.push(a);}
+ for(const a of existing){hunt.assign(a,state.month);if(!a.flee&&!allowed.has(Math.floor(a.y)*N+Math.floor(a.x))){let i=locations[Math.floor(hash(a.id*317)*locations.length)];for(let attempt=0;attempt<8;attempt++){const candidate=locations[Math.floor(hash(a.id*317+attempt*43)*locations.length)];if(!kept.some(b=>Math.hypot(b.x-(candidate%N+.5),b.y-(Math.floor(candidate/N)+.5))<1.2)){i=candidate;break;}}a.x=i%N+.5;a.y=Math.floor(i/N)+.5;}kept.push(a);}
  }
  state.animals=kept;const sets=Object.fromEntries(eco.species.map(a=>[a.kind,new Set(eco.locations(state,a.kind))]));actors=kept.map(a=>({...a,allowed:sets[a.kind]}));
 }
 
 let mapVisible=true;new IntersectionObserver(entries=>{mapVisible=entries[0].isIntersecting}).observe(canvas);
 let lastFrame=0;
-function animate(t){const seconds=lastFrame?Math.min(.25,(t-lastFrame)/1000):0;lastFrame=t;animationTime=t;if(!painting&&!panStart&&mapVisible&&document.visibilityState==='visible'&&!$('hunt-result').open&&!$('month-dialog').open&&(actors.length||hunting||state.walkers.length)){visitors.step(state,seconds);draw();}setTimeout(()=>requestAnimationFrame(animate),100)}requestAnimationFrame(animate);
+function animate(t){const seconds=lastFrame?Math.min(.25,(t-lastFrame)/1000):0;lastFrame=t;animationTime=t;if(!painting&&!panStart&&mapVisible&&document.visibilityState==='visible'&&!$('hunt-result').open&&!$('month-dialog').open&&(actors.length||hunting||state.walkers.length)){visitors.step(state,seconds);stepFlight(seconds);draw();}setTimeout(()=>requestAnimationFrame(animate),100)}requestAnimationFrame(animate);
 function clampView(){let visible=V/(S*zoom);viewX=Math.max(0,Math.min(N-visible,viewX));viewY=Math.max(0,Math.min(N-visible,viewY))}
 function changeZoom(factor){const old=V/(S*zoom);zoom=Math.max(.2,Math.min(4,zoom*factor));const now=V/(S*zoom);viewX+=(old-now)/2;viewY+=(old-now)/2;clampView();draw();updateView()}
 function updateView(){$('zoomlevel').textContent=Math.round(zoom*100)+' %';$('coords').textContent=`Ausschnitt: ${Math.floor(viewX)+1}, ${Math.floor(viewY)+1} · ${(Math.pow(V/(S*zoom),2)*eco.TILE_HA).toFixed(1)} ha`}
@@ -187,14 +187,35 @@ let metrics=[['Wald',e.forest],['Offenland',e.open],['Wasser',e.c.water],['Hecke
 for(const a of eco.species){const button=document.createElement('button');button.type='button';button.dataset.observe=a.kind;button.textContent=a.name+' · '+state.populations[a.kind];button.title=a.name+': '+state.populations[a.kind]+' im Revier · Lebensraumziel im Spiel: '+caps[a.kind];button.onclick=()=>{focusAnimal(a.kind);if(learning)showSpecies(a.id)};$('animals').append(button)}
 $('population-level').value=state.populationPercent;$('population-value').value=state.populationPercent+' %';$('population-budget').textContent='Bis zu '+Math.ceil(eco.populationFactor(state))+' Zuwanderer pro Spielmonat. Neue Bestände entwickeln sich schrittweise.';$('visitor-count').textContent=state.walkers.length+' Spaziergänger auf deinen Waldwegen';$('wildlife-summary').textContent=Object.values(state.populations).reduce((a,b)=>a+b,0)+' Tiere auf '+(AREA*eco.TILE_HA).toFixed(1)+' ha Gesamtfläche. Die Zahlen gelten für die ganze Karte.';$('habitat-summary').textContent=habitat.forestHa.toFixed(1)+' ha Wald · größte zusammenhängende Waldfläche '+habitat.largestForest.toFixed(1)+' ha · '+habitat.waterHa.toFixed(1)+' ha Gewässer/Feuchtgebiete.';$('habitat-targets').replaceChildren();for(const a of eco.species){const li=document.createElement('li');li.textContent=a.name+': '+caps[a.kind];$('habitat-targets').append(li);}updateHunt();$('harvest-total').textContent=Object.values(state.harvest).reduce((a,b)=>a+b,0);$('harvest-list').replaceChildren();for(const a of eco.species){const li=document.createElement('li');li.textContent=a.name+' · '+state.harvest[a.kind];$('harvest-list').append(li);}let tips=[];if(e.habitatEdges<650)tips.push('Schaffe mehr Übergänge zwischen Wald und Offenland.');if(e.c.hedge<200)tips.push('Hecken und Säume können die Strukturvielfalt verbessern.');if(e.c.water===0)tips.push('Wasserflächen und Feuchtgebiete fehlen.');if(e.forest<15000)tips.push('Einige zusammenhängende Waldflächen können Deckung bieten.');if(e.open<18000)tips.push('Offene Flächen sind für viele Arten wichtig.');if(!tips.length)tips.push('Dein Revier hat bereits verschiedene Lebensraumstrukturen. Beobachte die Entwicklung.');$('advice').innerHTML=tips.map(t=>`<div class="advice">${t}</div>`).join('')}
 function focusAnimal(kind){const a=actors.find(a=>a.kind===kind);if(a){viewX=a.x-V/(S*zoom)/2;viewY=a.y-V/(S*zoom)/2;clampView();draw();updateView();canvas.scrollIntoView({block:'center',behavior:'smooth'})}notify(a?'Beobachtung: '+eco.byKind[kind].name:'Noch keine '+eco.byKind[kind].name+' im Revier. Ausreichend passenden Lebensraum schaffen und mehrere Monate abwarten.');}
-function setHunting(on){hunting=on;canvas.classList.toggle('hunting',on);$('hunt-toggle').classList.toggle('active',on);$('hunt-toggle').setAttribute('aria-pressed',String(on));$('hunt-toggle').textContent=on?'⊕ Gewehr ablegen':'⊕ Gewehr auswählen';if(on){inspect=false;pan=false;$('inspect').classList.remove('active');$('inspect').textContent='🔎 Natur erkunden';$('pan').classList.remove('active');$('pan').textContent='✋ Karte verschieben';}draw();}
+function setHunting(on){hunting=on;canvas.classList.toggle('hunting',on);$('hunt-toggle').classList.toggle('active',on);$('hunt-toggle').setAttribute('aria-pressed',String(on));$('hunt-toggle-label').textContent=on?'Gewehr ablegen':'Gewehr nehmen';if(on){inspect=false;pan=false;$('inspect').classList.remove('active');$('inspect').textContent='🔎 Natur erkunden';$('pan').classList.remove('active');$('pan').textContent='✋ Karte verschieben';}draw();}
 function updateHunt(){const e=state.event;$('hunt-alert').hidden=!e;$('hunt-toggle').disabled=false;$('hunt-focus').hidden=!e;$('hunt-message').textContent=e?'Bestandswarnung: '+eco.byKind[e.kind].name+' – '+e.remaining+' Tier(e) über dem Spielziel. Wähle das Gewehr und tippe auf ein markiertes Tier.':'';}
+function startFlight(shotX,shotY){
+ const visible=V/(S*zoom);let count=0;
+ for(const o of drawnActors){if(o.actor.flee||Math.hypot(o.wx-shotX,o.wy-shotY)>8||o.x<0||o.x>V||o.y<0||o.y>V)continue;
+  let dx=o.wx-shotX,dy=o.wy-shotY,len=Math.hypot(dx,dy);if(len<.01){dx=1;dy=0;len=1;}
+  const a=state.animals.find(a=>a.id===o.actor.id);if(!a)continue;
+  a.flee={x:o.wx,y:o.wy,dx:dx/len,dy:dy/len,left:viewX,top:viewY,right:viewX+visible,bottom:viewY+visible};o.actor.flee=a.flee;count++;
+ }
+ if(count)persist();return count;
+}
+function stepFlight(seconds){
+ const escaped=new Set();
+ for(const a of state.animals){const f=a.flee;if(!f)continue;f.x+=f.dx*7*seconds;f.y+=f.dy*7*seconds;
+  // Allow the whole sprite to pass the edge before removing it.
+  if(f.x<f.left-1.5||f.x>f.right+1.5||f.y<f.top-1.5||f.y>f.bottom+1.5)escaped.add(a.id);
+ }
+ if(!escaped.size)return;
+ for(const a of state.animals)if(escaped.has(a.id))state.populations[a.kind]=Math.max(0,state.populations[a.kind]-1);
+ state.animals=state.animals.filter(a=>!escaped.has(a.id));persist();render();notify(escaped.size+' Tier(e) haben den Kartenausschnitt verlassen. Keine Abschüsse gezählt.');
+}
+
 function shoot(ev){
  const r=canvas.getBoundingClientRect(),x=(ev.clientX-r.left)*V/r.width,y=(ev.clientY-r.top)*V/r.height;
  const hit=[...drawnActors].reverse().find(a=>Math.abs(a.x-x)<a.w*.5&&y>a.y-a.h&&y<a.y+4);
- if(!hit){notify('Kein Tier getroffen.');return;}
- // Check current visible positions for every walker, including off-screen people.
- if(visitors.near(state,hit.wx,hit.wy)){$('hunt-result-title').textContent='Alarm! Menschen im Gefahrenbereich';$('hunt-result-message').textContent='Du hast versucht, zu dicht an einem Menschen zu schießen. Schuss aus Sicherheitsgründen gesperrt. Im Umkreis von 10 Feldern um das Tier ist ein Spaziergänger. Das Tier bleibt im Revier; kein Abschuss wird gezählt.';$('hunt-season-info').hidden=true;$('hunt-card').replaceChildren();$('hunt-result').classList.add('warning');$('hunt-result').showModal();return;}
+ const shotX=hit?hit.wx:viewX+x/(S*zoom),shotY=hit?hit.wy:viewY+y/(S*zoom);
+ // The safety check also applies to missed shots.
+ if(visitors.near(state,shotX,shotY)){$('hunt-result-title').textContent='Alarm! Menschen im Gefahrenbereich';$('hunt-result-message').textContent='Schuss aus Sicherheitsgründen gesperrt: Ein Spaziergänger ist im 10-Felder-Umkreis. Kein Tier wurde getroffen oder aufgescheucht.';$('hunt-season-info').hidden=true;$('hunt-card').replaceChildren();$('hunt-result').classList.add('warning');$('hunt-result').showModal();return;}
+ if(!hit){const count=startFlight(shotX,shotY);notify(count?'Fehlschuss! '+count+' Tier(e) flüchten aus dem Kartenausschnitt.':'Kein Tier getroffen. Keine Tiere in unmittelbarer Nähe.');return;}
  const lesson=hunt.explain(hit.actor,state.month),name=eco.byKind[hit.kind].name;
  eco.reconcile(state);if(!eco.take(state,hit.kind))return;state.animals=state.animals.filter(a=>a.id!==hit.actor.id);state.harvest[hit.kind]++;
  persist();render();$('hunt-result-title').textContent=lesson.title;$('hunt-result-message').textContent=name+' – '+lesson.text+' Das Tier wurde aus dem Revier entfernt und in der Abschussliste gezählt.';$('hunt-season-info').hidden=false;$('hunt-result').classList.toggle('warning',lesson.warning);window.RevierLearning.renderInto($('hunt-card'),eco.byKind[hit.kind].id);$('hunt-result').showModal();
