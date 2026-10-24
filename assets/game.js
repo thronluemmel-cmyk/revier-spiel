@@ -16,7 +16,7 @@ function valid(s){return eco.valid(s)&&Number.isInteger(s.month)&&s.month>=0&&s.
 try{let v=migrate(JSON.parse(localStorage.getItem(KEY)));state=valid(v)?v:fresh()}catch{state=fresh()}
 const canvas=$('map'),ctx=canvas.getContext('2d');const V=canvas.width;let decorations=[];function hash(i){let x=Math.sin(i*94.12+5.1)*47453.5;return x-Math.floor(x)}
 let animationTime=0,framePending=false;
-function colorFor(type,season){const colors={meadow:['#b2c982','#8fb86d','#bdab72','#c8c6b9'],flowers:['#a9ca80','#8fbf70','#bfae76','#c9c7b7'],deciduous:['#77a65f','#477f45','#b17e46','#b9b6aa'],conifer:['#497957','#346b4d','#416d4f','#667b70'],water:['#65b5c8','#438db5','#528fae','#8caeb9'],field:['#b9b47d','#c6ac65','#aa8d57','#c1bcb0'],mountain:['#979e94','#919a91','#99938b','#b8b8b5'],hedge:['#6e9c5e','#4b8951','#8d7847','#a4aaa0'],wetland:['#79a999','#6c9c89','#9b9980','#b4bbb6'],path:['#b8a27b','#b49a6e','#a68e6b','#b3aca0'],deadwood:['#8e9b72','#7e966b','#a58c69','#b5b2a5']};return (colors[type]||colors.meadow)[season]}
+function colorFor(type,season){const colors={meadow:['#b2c982','#8fb86d','#bdab72','#c8c6b9'],flowers:['#a9ca80','#8fbf70','#bfae76','#c9c7b7'],deciduous:['#7e9363','#617647','#92774b','#b9b6aa'],conifer:['#677d55','#4d6346','#5c6847','#667b70'],water:['#65b5c8','#438db5','#528fae','#8caeb9'],field:['#b9b47d','#c6ac65','#aa8d57','#c1bcb0'],mountain:['#979e94','#919a91','#99938b','#b8b8b5'],hedge:['#6e9c5e','#4b8951','#8d7847','#a4aaa0'],wetland:['#79a999','#6c9c89','#9b9980','#b4bbb6'],path:['#b8a27b','#b49a6e','#a68e6b','#b3aca0'],deadwood:['#8e9b72','#7e966b','#a58c69','#b5b2a5']};return (colors[type]||colors.meadow)[season]}
 function disk(x,y,r,c){ctx.fillStyle=c;ctx.beginPath();ctx.arc(x,y,r,0,Math.PI*2);ctx.fill()}
 function tree(px,py,size,type,i,season){let x=px+size*.52,y=py+size*.62,r=size*.35;ctx.fillStyle='rgba(21,39,22,.19)';ctx.beginPath();ctx.ellipse(x+r*.25,y+r*.4,r*.82,r*.42,-.2,0,7);ctx.fill();ctx.fillStyle='#68523b';ctx.fillRect(x-r*.12,y-r*.05,r*.24,r*.62);if(type==='conifer'){for(let k=0;k<3;k++){let yy=y-r*.95+k*r*.35,rr=r*(.53+k*.22);ctx.fillStyle=['#234d3b','#2b6749','#3b7950'][k];ctx.beginPath();ctx.moveTo(x,yy-r*.8);ctx.lineTo(x-rr,yy+r*.65);ctx.lineTo(x+rr,yy+r*.65);ctx.fill()}if(season===3){ctx.strokeStyle='#dce6e4';ctx.lineWidth=Math.max(1,size*.045);ctx.beginPath();ctx.moveTo(x,y-r*1.15);ctx.lineTo(x-r*.48,y-r*.2);ctx.moveTo(x,y-r*.95);ctx.lineTo(x+r*.4,y+r*.06);ctx.stroke()}}else{let leaves=season===2?['#b87837','#d39a4b','#8e7337']:season===3?['#aeb7ad','#d1d4cc','#9fa9a1']:season===0?['#6da85c','#8fc375','#508c4d']:['#387a40','#50994a','#2c673b'];for(let k=0;k<5;k++){let angle=k*Math.PI*2/5;disk(x+Math.cos(angle)*r*.48,y-r*.62+Math.sin(angle)*r*.4,r*.48,leaves[k%3])}disk(x,y-r*.65,r*.6,leaves[1])}}
 function animalSprite(x,y,r,kind){ctx.save();ctx.translate(x,y);ctx.fillStyle='rgba(0,0,0,.18)';ctx.beginPath();ctx.ellipse(0,r*.55,r*.9,r*.24,0,0,7);ctx.fill();let body=kind==='deer'?'#a87348':kind==='hare'?'#937658':kind==='fox'?'#c77b3c':'#544d42';ctx.fillStyle=body;ctx.beginPath();ctx.ellipse(0,0,r*.75,r*.42,-.2,0,7);ctx.fill();disk(r*.58,-r*.24,r*.3,body);if(kind==='deer'){ctx.strokeStyle='#644d35';ctx.lineWidth=Math.max(1,r*.09);for(let a of [-.5,.3]){ctx.beginPath();ctx.moveTo(a*r,r*.22);ctx.lineTo((a-.12)*r,r*.85);ctx.stroke()}ctx.beginPath();ctx.moveTo(r*.65,-r*.43);ctx.lineTo(r*.52,-r*.95);ctx.moveTo(r*.65,-r*.43);ctx.lineTo(r*.9,-r*.86);ctx.stroke()}else if(kind==='hare'){ctx.fillStyle=body;ctx.beginPath();ctx.ellipse(r*.46,-r*.75,r*.13,r*.45,-.2,0,7);ctx.ellipse(r*.7,-r*.76,r*.13,r*.45,.1,0,7);ctx.fill()}else if(kind==='fox'){ctx.fillStyle='#e5d8b6';ctx.beginPath();ctx.moveTo(r*.75,-r*.15);ctx.lineTo(r*1.18,-r*.05);ctx.lineTo(r*.7,r*.08);ctx.fill();ctx.fillStyle=body;ctx.beginPath();ctx.moveTo(-r*.55,-r*.1);ctx.lineTo(-r*1.35,-r*.42);ctx.lineTo(-r*.9,r*.3);ctx.fill()}else{disk(r*.8,-r*.18,r*.17,'#756c5a')}ctx.restore()}
@@ -51,7 +51,7 @@ function terrainDetail(type,px,py,size,i,season){
  ctx.restore();
 }
 // 0.7: image artwork, layered scenery and a cached terrain pass.
-const art={}; let groundCache=null,sceneCache=null,sceneKey='',groundKey='',actors=[],drawnActors=[];
+const art={}; let groundCache=null,sceneCache=null,sceneKey='',groundKey='',actors=[],drawnActors=[],sceneryBands=[];
 for(const name of ['woodland','wildlife','wildlife-more','trees-a','trees-b','trees-c']){const im=new Image();art[name]=im;im.onload=()=>{groundKey='';draw()};im.src='assets/art/'+name+'.webp'}
 function sprite(atlas,col,row,x,y,w,h,flip=false){
  const im=art[atlas];if(!im||!im.complete||!im.naturalWidth)return false;
@@ -69,14 +69,14 @@ const treeSprites=new Map();
 function treeSprite(t,season,x,y,w,h,flip){
  const im=art[t.atlas];if(!im?.complete||!im.naturalWidth)return false;
  const key=t.id+':'+season;let tile=treeSprites.get(key);
- if(!tile){tile=document.createElement('canvas');tile.width=192;tile.height=192;const c=tile.getContext('2d'),cols=t.atlas==='trees-b'?4:3,rows=t.atlas==='trees-a'?3:2,sw=im.naturalWidth/cols,sh=im.naturalHeight/rows,scale=Math.min(192/sw,192/sh);if(season===2&&(t.type==='deciduous'||t.id==='lärche'))c.filter='sepia(.65) saturate(1.4)';if(season===3)c.filter='saturate(.35) brightness(1.15)';c.drawImage(im,t.col*sw,t.row*sh,sw,sh,(192-sw*scale)/2,192-sh*scale,sw*scale,sh*scale);treeSprites.set(key,tile);}
+ if(!tile){tile=document.createElement('canvas');tile.width=192;tile.height=192;const c=tile.getContext('2d'),cols=t.atlas==='trees-b'?4:3,rows=t.atlas==='trees-a'?3:2,sw=im.naturalWidth/cols,sh=im.naturalHeight/rows,scale=Math.min(192/sw,192/sh);if(season===2&&(t.type==='deciduous'||t.id==='lärche'))c.filter='sepia(.65) saturate(1.4)';if(season===3)c.filter='saturate(.35) brightness(1.15)';c.drawImage(im,t.col*sw,t.row*sh,sw,sh,(192-sw*scale)/2,192-sh*scale,sw*scale,sh*scale);c.filter='none';c.globalCompositeOperation='source-atop';const light=c.createLinearGradient(0,0,192,192);light.addColorStop(0,'#fff3c52b');light.addColorStop(.4,'#ffffff00');light.addColorStop(1,'#102f375c');c.fillStyle=light;c.fillRect(0,0,192,192);c.globalCompositeOperation='source-over';treeSprites.set(key,tile);}
  const size=Math.min(w,h);ctx.save();ctx.translate(x,y);if(flip)ctx.scale(-1,1);ctx.drawImage(tile,-size/2,-size,size,size);ctx.restore();return true;
 }
 function queueDraw(){if(framePending)return;framePending=true;requestAnimationFrame(()=>{framePending=false;draw();});}
 
 function draw(){
  const size=S*zoom,visible=V/size,season=[3,3,0,0,0,1,1,1,2,2,2,3][state.month%12];
- const sx=Math.max(0,Math.floor(viewX)-2),sy=Math.max(0,Math.floor(viewY)-3),ex=Math.min(N,Math.ceil(viewX+visible)+2),ey=Math.min(N,Math.ceil(viewY+visible)+3);
+ const sx=Math.max(0,Math.floor(viewX)-2),sy=Math.max(0,Math.floor(viewY)-5),ex=Math.min(N,Math.ceil(viewX+visible)+2),ey=Math.min(N,Math.ceil(viewY+visible)+5);
  const key=[viewX,viewY,zoom,season].join(':');
  if(!groundCache){groundCache=document.createElement('canvas');groundCache.width=V;groundCache.height=V}
  const rebuild=groundKey!==key||dirty||sceneKey!==key;
@@ -97,7 +97,7 @@ function draw(){
  }
  ctx.clearRect(0,0,V,V);ctx.drawImage(groundCache,0,0);
  const objects=[];
- if(rebuild&&size>11)for(let y=sy;y<ey;y++)for(let x=sx;x<ex;x++){
+ if(rebuild&&size>5)for(let y=sy;y<ey;y++)for(let x=sx;x<ex;x++){
  const i=y*N+x,type=state.tiles[i],h=hash(i);let cell=null,m=1;
  if(type==='deciduous'){cell=season===3?[3,0]:season===2?[2,0]:h>.72?[1,2]:[0,0];m=1.5}
  if(type==='conifer'){cell=season===3?[2,2]:[1,0];m=1.55}
@@ -108,13 +108,28 @@ function draw(){
  if(type==='mountain'){cell=[0,2];m=1.25}
  if(type==='field'&&season!==3&&h>.45){cell=[3,2];m=.7}
  if(type==='meadow'&&h>.975&&season!==3){cell=[2,1];m=.4}
- if(cell)objects.push({x:(x-viewX+.5+(h-.5)*.24)*size,y:(y-viewY+.88)*size,cell,m,h,tree:trees.byId[state.trees[i]]});
+ if(cell){const t=trees.byId[state.trees[i]];if(t)m=(t.type==='conifer'?2.35:2.05)*(.85+hash(i+41)*.32);objects.push({x:(x-viewX+.5+(h-.5)*.5)*size,y:(y-viewY+.88)*size,cell,m,h,tree:t});}
  }
  if(rebuild){
- objects.sort((a,b)=>a.y-b.y);for(const o of objects){const t=o.tree;if(!t||!treeSprite(t,season,o.x,o.y,size*o.m,size*o.m,o.h>.5))sprite('woodland',...o.cell,o.x,o.y,size*o.m,size*o.m,o.h>.5);}
- if(!sceneCache){sceneCache=document.createElement('canvas');sceneCache.width=V;sceneCache.height=V}
- const sc=sceneCache.getContext('2d');sc.clearRect(0,0,V,V);sc.drawImage(canvas,0,0);sceneKey=key;
- }else{ctx.clearRect(0,0,V,V);ctx.drawImage(sceneCache,0,0)}
+ // Cache transparent, tightly cropped depth bands. Moving actors can be inserted
+ // between them without redrawing individual trees every animation frame.
+ ctx.clearRect(0,0,V,V);ctx.drawImage(groundCache,0,0);
+ for(const o of objects)if(o.tree||o.cell[1]===0||o.cell[1]===2){
+  ctx.save();ctx.translate(o.x,o.y);ctx.rotate(.36);ctx.scale(1,.35);const r=size*o.m*.49,g=ctx.createRadialGradient(0,0,0,0,0,r);g.addColorStop(0,'#12291f66');g.addColorStop(1,'#12291f00');ctx.fillStyle=g;ctx.beginPath();ctx.ellipse(r*.25,0,r,r*.7,0,0,7);ctx.fill();ctx.restore();
+ }
+ const gc=groundCache.getContext('2d');gc.clearRect(0,0,V,V);gc.drawImage(canvas,0,0);
+ sceneryBands=[];
+ const rows=new Map();for(const o of objects){const row=rows.get(o.y)||[];row.push(o);rows.set(o.y,row);}
+ for(const [depth,row] of [...rows].sort((a,b)=>a[0]-b[0])){
+  ctx.clearRect(0,0,V,V);
+  for(const o of row){const t=o.tree;if(!t||!treeSprite(t,season,o.x,o.y,size*o.m,size*o.m,o.h>.5))sprite('woodland',...o.cell,o.x,o.y,size*o.m,size*o.m,o.h>.5);}
+  const top=Math.max(0,Math.floor(depth-Math.max(...row.map(o=>size*o.m))-2)),bottom=Math.min(V,Math.ceil(depth+2));if(bottom<=top)continue;
+  const image=document.createElement('canvas');image.width=V;image.height=bottom-top;const c=image.getContext('2d');c.drawImage(canvas,0,top,V,bottom-top,0,0,V,bottom-top);
+  sceneryBands.push({depth,top,image,alpha:c.getImageData(0,0,V,bottom-top).data});
+ }
+ sceneKey=key;
+ }
+ ctx.clearRect(0,0,V,V);ctx.drawImage(groundCache,0,0);
  drawnActors=[];
  for(const a of actors){
  const phase=animationTime*(a.flee?.0018:.00018)+a.phase;let wx=a.flee?a.flee.x:a.x+Math.sin(phase)*.25,wy=a.flee?a.flee.y:a.y+Math.cos(phase*.7)*.2;
@@ -124,26 +139,28 @@ function draw(){
  drawnActors.push({kind:a.kind,wx,wy,x:(wx-viewX)*size,y:(wy-viewY)*size,flip:a.flee?a.flee.dx<0:Math.cos(phase)<0,actor:a});
  }
  drawnActors.sort((a,b)=>a.y-b.y);
- for(const o of drawnActors){const extra=EXTRA_BY_ID[o.kind],c=extra?[extra[4],extra[5]]:{deer:[0,0],hare:[1,0],fox:[0,1],boar:[1,1]}[o.kind];const m=['hare','eichhornchen','stockente'].includes(o.kind)?.85:1.25;
- o.w=size*m;o.h=size*m;
- if(!sprite(extra?'wildlife-more':'wildlife',...c,o.x,o.y,o.w,o.h,o.flip))animalSprite(o.x,o.y,size*.35,o.kind);
- if(hunting&&state.event?.kind===o.kind){ctx.strokeStyle='#f4d77d';ctx.lineWidth=2;ctx.beginPath();ctx.ellipse(o.x,o.y-size*.35,size*.55,size*.55,0,0,Math.PI*2);ctx.stroke();}
+ const people=visitors.positions(state),layers=sceneryBands.map(b=>({depth:b.depth,paint:()=>ctx.drawImage(b.image,0,b.top)}));
+ // Safety circles lie on the ground; people themselves share the scene depth.
+ if(hunting)for(const p of people){const x=(p.x-viewX)*size,y=(p.y-viewY)*size;ctx.save();ctx.strokeStyle='#bb593688';ctx.fillStyle='#eaa14c0b';ctx.lineWidth=1.5;ctx.setLineDash([6,6]);ctx.beginPath();ctx.arc(x,y,size*10,0,Math.PI*2);ctx.fill();ctx.stroke();ctx.restore();}
+ for(const o of drawnActors){const extra=EXTRA_BY_ID[o.kind],c=extra?[extra[4],extra[5]]:{deer:[0,0],hare:[1,0],fox:[0,1],boar:[1,1]}[o.kind];const m=['hare','eichhornchen','stockente'].includes(o.kind)?.8:1.1;o.w=size*m;o.h=size*m;
+  layers.push({depth:o.y,paint:()=>{groundShadow(o.x,o.y,size*m*.38);if(!sprite(extra?'wildlife-more':'wildlife',...c,o.x,o.y,o.w,o.h,o.flip))animalSprite(o.x,o.y,size*.35,o.kind);if(hunting&&state.event?.kind===o.kind){ctx.strokeStyle='#f4d77d';ctx.lineWidth=2;ctx.beginPath();ctx.ellipse(o.x,o.y-size*.35,size*.55,size*.55,0,0,Math.PI*2);ctx.stroke();}}});
  }
- drawVisitors(size,visible);
+ for(const p of people)if(p.x>=viewX-1&&p.x<=viewX+visible+1&&p.y>=viewY-1&&p.y<=viewY+visible+1)layers.push({depth:(p.y-viewY)*size,paint:()=>drawPerson(p,size)});
+ layers.sort((a,b)=>a.depth-b.depth);for(const layer of layers)layer.paint();
+ // Soft directional daylight, kept subtle so shaded animals stay visible.
+ const light=ctx.createLinearGradient(0,0,V,V);light.addColorStop(0,'#ffeac00b');light.addColorStop(.45,'#ffffff00');light.addColorStop(1,'#152b3a1a');ctx.fillStyle=light;ctx.fillRect(0,0,V,V);
+ const edge=ctx.createRadialGradient(V*.48,V*.43,V*.22,V*.5,V*.5,V*.77);edge.addColorStop(0,'#14251e00');edge.addColorStop(1,'#14251e37');ctx.fillStyle=edge;ctx.fillRect(0,0,V,V);
 }
-
-function drawVisitors(size,visible){
- for(const p of visitors.positions(state)){
-  if(p.x<viewX-11||p.x>viewX+visible+11||p.y<viewY-11||p.y>viewY+visible+11)continue;
-  const x=(p.x-viewX)*size,y=(p.y-viewY)*size;
-  if(hunting){ctx.save();ctx.strokeStyle='#bb593688';ctx.fillStyle='#eaa14c0b';ctx.lineWidth=1.5;ctx.setLineDash([6,6]);ctx.beginPath();ctx.arc(x,y,size*10,0,Math.PI*2);ctx.fill();ctx.stroke();ctx.restore();}
-  if(p.x<viewX-1||p.x>viewX+visible+1||p.y<viewY-1||p.y>viewY+visible+1)continue;
-  const scale=Math.max(10,size*.65),stride=Math.sin(p.phase*Math.PI*2)*.1;
-  ctx.save();ctx.translate(x,y);ctx.scale(scale,scale);ctx.fillStyle='#192c2550';ctx.beginPath();ctx.ellipse(0,.04,.24,.09,0,0,7);ctx.fill();
-  ctx.strokeStyle='#354454';ctx.lineWidth=.09;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(-.07,-.25);ctx.lineTo(-.11+stride,0);ctx.moveTo(.07,-.25);ctx.lineTo(.11-stride,0);ctx.stroke();
-  ctx.fillStyle=p.id%2?'#c67a45':'#407da0';ctx.fillRect(-.14,-.61,.28,.38);ctx.fillStyle='#6b6146';ctx.fillRect(-.21,-.57,.1,.25);
-  ctx.strokeStyle='#d7b18a';ctx.lineWidth=.07;ctx.beginPath();ctx.moveTo(.15,-.55);ctx.lineTo(.21+stride,-.3);ctx.stroke();ctx.fillStyle='#e1b990';ctx.beginPath();ctx.arc(0,-.73,.13,0,7);ctx.fill();ctx.fillStyle='#546142';ctx.fillRect(-.16,-.87,.31,.08);ctx.restore();
- }
+function groundShadow(x,y,r){ctx.save();ctx.translate(x,y);ctx.scale(1,.3);const g=ctx.createRadialGradient(0,0,0,0,0,r);g.addColorStop(0,'#10261f70');g.addColorStop(1,'#10261f00');ctx.fillStyle=g;ctx.beginPath();ctx.arc(0,0,r,0,7);ctx.fill();ctx.restore();}
+function sceneryCovers(o,x,y){
+ for(const b of sceneryBands){if(b.depth<=o.y||y<b.top||y>=b.top+b.image.height||x<0||x>=V)continue;const i=(Math.floor(y-b.top)*V+Math.floor(x))*4+3;if(b.alpha[i]>80)return true;}return false;
+}
+function drawPerson(p,size){
+ const x=(p.x-viewX)*size,y=(p.y-viewY)*size,scale=Math.max(10,size*.65),stride=Math.sin(p.phase*Math.PI*2)*.1;groundShadow(x,y,scale*.4);
+ ctx.save();ctx.translate(x,y);ctx.scale(scale,scale);
+ ctx.strokeStyle='#354454';ctx.lineWidth=.09;ctx.lineCap='round';ctx.beginPath();ctx.moveTo(-.07,-.25);ctx.lineTo(-.11+stride,0);ctx.moveTo(.07,-.25);ctx.lineTo(.11-stride,0);ctx.stroke();
+ const coat=ctx.createLinearGradient(-.14,-.6,.14,-.2);coat.addColorStop(0,p.id%2?'#d79858':'#65a1b0');coat.addColorStop(1,p.id%2?'#875735':'#2e5669');ctx.fillStyle=coat;ctx.fillRect(-.14,-.61,.28,.38);ctx.fillStyle='#6b6146';ctx.fillRect(-.21,-.57,.1,.25);
+ ctx.strokeStyle='#d7b18a';ctx.lineWidth=.07;ctx.beginPath();ctx.moveTo(.15,-.55);ctx.lineTo(.21+stride,-.3);ctx.stroke();ctx.fillStyle='#e1b990';ctx.beginPath();ctx.arc(0,-.73,.13,0,7);ctx.fill();ctx.fillStyle='#546142';ctx.fillRect(-.16,-.87,.31,.08);ctx.restore();
 }
 
 function populateActors(report=null){
@@ -211,7 +228,7 @@ function stepFlight(seconds){
 
 function shoot(ev){
  const r=canvas.getBoundingClientRect(),x=(ev.clientX-r.left)*V/r.width,y=(ev.clientY-r.top)*V/r.height;
- const hit=[...drawnActors].reverse().find(a=>Math.abs(a.x-x)<a.w*.5&&y>a.y-a.h&&y<a.y+4);
+ const hit=[...drawnActors].reverse().find(a=>Math.abs(a.x-x)<a.w*.5&&y>a.y-a.h&&y<a.y+4&&!sceneryCovers(a,x,y));
  const shotX=hit?hit.wx:viewX+x/(S*zoom),shotY=hit?hit.wy:viewY+y/(S*zoom);
  // The safety check also applies to missed shots.
  if(visitors.near(state,shotX,shotY)){$('hunt-result-title').textContent='Alarm! Menschen im Gefahrenbereich';$('hunt-result-message').textContent='Schuss aus Sicherheitsgründen gesperrt: Ein Spaziergänger ist im 10-Felder-Umkreis. Kein Tier wurde getroffen oder aufgescheucht.';$('hunt-season-info').hidden=true;$('hunt-card').replaceChildren();$('hunt-result').classList.add('warning');$('hunt-result').showModal();return;}
