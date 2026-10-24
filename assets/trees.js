@@ -5,7 +5,7 @@ const byId=Object.fromEntries(species.map(s=>[s.id,s]));
 function grow(s,N){
  window.RevierWorld.ensure(s);const parents=[];for(let i=0;i<s.tiles.length;i++)if(byId[s.trees[i]]&&window.RevierWorld.maturity(s,i)>=.5)parents.push(i);
  if(!parents.length)return 0;
- const limit=Math.min(8,Math.max(1,Math.round(parents.length*.015))),candidates=new Map();
+ const limit=Math.min(8,Math.max(2,Math.round(parents.length*.015))),candidates=new Map();
  for(const i of parents){const x=i%N,y=Math.floor(i/N);for(const [dx,dy] of [[-1,0],[1,0],[0,-1],[0,1]]){const nx=x+dx,ny=y+dy,j=ny*N+nx;if(nx>=0&&nx<N&&ny>=0&&ny<N&&s.tiles[j]==='meadow'&&!candidates.has(j))candidates.set(j,s.trees[i]);}}
  const rank=i=>{const v=Math.sin(i*91.7+s.month*13.1)*43758;return v-Math.floor(v)};
  const chosen=[...candidates].sort((a,b)=>rank(a[0])-rank(b[0])).slice(0,limit);
