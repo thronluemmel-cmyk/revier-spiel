@@ -1,0 +1,26 @@
+REVIER – vollständige Version 0.16
+
+ZIP vollständig entpacken und den enthaltenen Ordner revier öffnen.
+Den äußeren Ordner revier nicht als zusätzlichen Ordner im Repository hochladen.
+index.html muss direkt im Hauptverzeichnis deines Repositorys liegen.
+
+Inhalt hochladen:
+- index.html, README.md, UPLOAD.md und diese Anleitung -> Hauptverzeichnis
+- Die 12 einzelnen JavaScript-/CSS-Dateien aus assets -> GitHub-Ordner assets
+- assets/art -> Ordner assets/art
+- assets/learning-1 -> Ordner assets/learning-1 (80 Bilder)
+- assets/learning-2 -> Ordner assets/learning-2 (80 Bilder)
+- assets/learning-3 -> Ordner assets/learning-3 (30 Bilder)
+- docs -> Ordner docs
+
+Nicht den gesamten assets-Ordner auf einmal hochladen: Die Unterordner zählen beim
+Upload mit. Jeden Bild-Unterordner einzeln hochladen, die 12 Dateien in assets separat.
+Bei bereits geöffnetem Zielordner immer dessen Inhalt hochladen, damit kein doppelter
+Unterordner entsteht. Nach jedem Upload Commit changes bestätigen.
+
+Gleichnamige Dateien ersetzen. Dateien des versehentlich hochgeladenen Angelprojekts
+werden durch dieses Paket nicht automatisch gelöscht.
+
+Nach der Bereitstellung Spielseite mit Strg+F5 neu laden.
+Oben steht: Karte & Wildflucht · 0.16.
+Keine neue Landschaft starten, wenn du deinen bisherigen Spielstand behalten möchtest.
