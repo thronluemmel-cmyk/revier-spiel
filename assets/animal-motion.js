@@ -30,12 +30,14 @@ function pose(item,kind,frame,running){
  }
  c.putImageData(out,0,0);item.poses.set(key,canvas);return canvas;
 }
-function draw(c,image,kind,col,row,more,x,y,w,h,flip,phase,moving,running){
+function draw(c,image,kind,col,row,more,x,y,w,h,flip,phase,moving,running,behavior='roam',water=false){
  const item=tile(image,kind,col,row,more);if(!item)return false;
  const cfg=configs[kind],frame=((Math.floor(phase/(Math.PI*2)*FRAMES)%FRAMES)+FRAMES)%FRAMES;
  const picture=moving?pose(item,kind,frame,running):item.canvas;
  const bounce=moving?(cfg.hop?-Math.max(0,Math.sin(phase))*h*(running?.045:.022):Math.sin(phase*2)*h*.005):0;
- c.save();c.translate(x,y+bounce);if(flip)c.scale(-1,1);c.drawImage(picture,-w/2,-h,w,h);c.restore();return true;
+ const swimming=water&&['stockente','biber','fischotter'].includes(kind);
+ if(swimming){c.save();c.strokeStyle='#c5e2ddaa';c.lineWidth=1.2;c.beginPath();c.ellipse(x,y-h*.12,w*.38,h*.09,0,0,Math.PI*2);c.stroke();c.restore();}
+ c.save();c.translate(x,y+bounce);if(flip)c.scale(-1,1);if(swimming){c.beginPath();c.rect(-w,-h,w*2,h);c.clip();c.drawImage(picture,-w/2,-h*.82,w,h);}else{if(behavior==='feed'&&!moving){c.translate(0,-h*.5);c.rotate(.055+Math.sin(phase)*.018);c.translate(0,h*.5);}c.drawImage(picture,-w/2,-h,w,h);}c.restore();return true;
 }
 window.RevierAnimalMotion={draw,configs};
 })();
