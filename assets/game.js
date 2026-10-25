@@ -136,7 +136,7 @@ function draw(){
  const rows=new Map();for(const o of objects){const row=rows.get(o.y)||[];row.push(o);rows.set(o.y,row);}
  for(const [depth,row] of [...rows].sort((a,b)=>a[0]-b[0])){
   ctx.clearRect(0,0,V,V);
-  for(const o of row){if(o.type==='deadwood'){forest.drawWood(ctx,state,o.index,o.x,o.y,size);continue;}const t=o.tree;if(!t||!treeSprite(t,season,o.x,o.y,size*o.m,size*o.m,o.h>.5))sprite('woodland',...o.cell,o.x,o.y,size*o.m,size*o.m,o.h>.5);}
+  for(const o of row){if(o.type==='deadwood'){if(!forest.standing(state,o.index)&&sprite('woodland',1,1,o.x,o.y,size*o.m,size*o.m,o.h>.5))continue;forest.drawWood(ctx,state,o.index,o.x,o.y,size);continue;}const t=o.tree;if(!t||!treeSprite(t,season,o.x,o.y,size*o.m,size*o.m,o.h>.5))sprite('woodland',...o.cell,o.x,o.y,size*o.m,size*o.m,o.h>.5);}
   const top=Math.max(0,Math.floor(depth-Math.max(...row.map(o=>size*o.m))-2)),bottom=Math.min(V,Math.ceil(depth+2));if(bottom<=top)continue;
   const image=document.createElement('canvas');image.width=V;image.height=bottom-top;const c=image.getContext('2d');c.drawImage(canvas,0,top,V,bottom-top,0,0,V,bottom-top);
   sceneryBands.push({depth,top,image,alpha:c.getImageData(0,0,V,bottom-top).data});
