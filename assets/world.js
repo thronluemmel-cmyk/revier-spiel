@@ -1,7 +1,7 @@
 /* 0.21: passive landscape minimap, independent day cycle and tree development. */
 (()=>{'use strict';
 const N=212,ready=new WeakSet();let miniTiles=null,miniImage=null,revision=0,miniRev=-1;
-const colors={meadow:'#a7b779',flowers:'#c0b866',deciduous:'#497746',conifer:'#285443',hedge:'#718a46',water:'#5095b8',wetland:'#77a69c',field:'#cab16b',mountain:'#a2a39b',path:'#d6bb91',deadwood:'#826749'};
+const colors={meadow:'#a7b779',flowers:'#c0b866',deciduous:'#497746',conifer:'#285443',hedge:'#718a46',water:'#5095b8',wetland:'#858252',field:'#cab16b',mountain:'#a2a39b',path:'#d6bb91',deadwood:'#826749'};
 function ensure(s){if(ready.has(s))return;if(!Array.isArray(s.treePlanted)||s.treePlanted.length!==s.tiles.length||!s.treePlanted.every(x=>x===null||(Number.isInteger(x)&&x>=-1000&&x<=s.month))){s.treePlanted=s.trees.map(id=>id?s.month-360:null);}if(!Number.isFinite(s.skyHours)||s.skyHours<0||s.skyHours>1e9)s.skyHours=8;ready.add(s);}
 function maturity(s,i){ensure(s);const id=s.trees[i];if(!id)return 0;const age=Math.max(0,s.month-(s.treePlanted[i]??s.month-360)),years=['birke','weide','salweide','espe','erle'].includes(id)?10:['eiche','traubeneiche','buche'].includes(id)?30:20;return Math.min(1,age/(years*12));}
 function scale(s,i){return .3+.7*maturity(s,i);}

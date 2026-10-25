@@ -7,7 +7,7 @@ const configs={
  eichhornchen:{hip:.88,left:.45,right:.98,hop:true},biber:{hip:.90,left:.45,right:.94},fischotter:{hip:.88,left:.38,right:.98},
  stockente:{hip:.89,left:.4,right:.80},fasan:{hip:.89,left:.57,right:.88},graureiher:{hip:.81,left:.35,right:.79}
 };
-const cache=new Map(),SIZE=160,FRAMES=16;
+const cache=new Map(),masks=new WeakMap(),SIZE=160,FRAMES=16;
 const smooth=n=>{n=Math.max(0,Math.min(1,n));return n*n*(3-2*n)};
 function tile(image,kind,col,row,more,grid=null){const key=kind+(grid?':'+grid.tag:'');let item=cache.get(key);if(item&&item.image===image)return item;
  if(!image?.complete||!image.naturalWidth)return null;
@@ -39,7 +39,9 @@ function draw(c,image,kind,col,row,more,x,y,w,h,flip,phase,moving,running,behavi
  const bounce=moving?(cfg.hop?-Math.max(0,Math.sin(phase))*h*(running?.045:.022):Math.sin(phase*2)*h*.005):0;
  const swimming=water&&['stockente','biber','fischotter'].includes(kind);
  if(swimming){c.save();c.strokeStyle='#c5e2ddaa';c.lineWidth=1.2;c.beginPath();c.ellipse(x,y-h*.12,w*.38,h*.09,0,0,Math.PI*2);c.stroke();c.restore();}
- c.save();if(appearance?.coat&&appearance.coat!=='none')c.filter=appearance.coat;c.translate(x,y+bounce);if(flip)c.scale(-1,1);if(swimming){c.beginPath();c.rect(-w,-h,w*2,h);c.clip();c.drawImage(picture,-w/2,-h*.82,w,h);}else{if(behavior==='feed'&&!moving){c.translate(0,-h*.5);c.rotate(.055+Math.sin(phase)*.018);c.translate(0,h*.5);}c.drawImage(picture,-w/2,-h,w,h);}c.restore();return true;
+ c.save();if(appearance?.coat&&appearance.coat!=='none')c.filter=appearance.coat;c.translate(x,y+bounce);if(flip)c.scale(-1,1);if(swimming){c.beginPath();c.rect(-w,-h,w*2,h);c.clip();capture(appearance,picture,c,-w/2,-h*.82,w,h,0);c.drawImage(picture,-w/2,-h*.82,w,h);}else{if(behavior==='feed'&&!moving){c.translate(0,-h*.5);c.rotate(.055+Math.sin(phase)*.018);c.translate(0,h*.5);}capture(appearance,picture,c,-w/2,-h,w,h);c.drawImage(picture,-w/2,-h,w,h);}c.restore();return true;
 }
-window.RevierAnimalMotion={draw,configs};
+function capture(appearance,picture,c,left,top,width,height,clipBottom=Infinity){if(!appearance?.onHitRegion)return;let mask=masks.get(picture);if(!mask){const pixels=picture.getContext('2d').getImageData(0,0,SIZE,SIZE).data;mask=new Uint8Array(SIZE*SIZE);for(let i=0;i<mask.length;i++)mask[i]=pixels[i*4+3];masks.set(picture,mask);}const t=c.getTransform();appearance.onHitRegion({mask,left,top,width,height,clipBottom,a:t.a,b:t.b,c:t.c,d:t.d,e:t.e,f:t.f});}
+function hit(region,x,y){const r=region,det=r.a*r.d-r.b*r.c;if(!det||!Number.isFinite(x)||!Number.isFinite(y))return false;const dx=x-r.e,dy=y-r.f,lx=(r.d*dx-r.c*dy)/det,ly=(-r.b*dx+r.a*dy)/det;if(ly>r.clipBottom)return false;const sx=(lx-r.left)/r.width*SIZE,sy=(ly-r.top)/r.height*SIZE;if(sx<0||sy<0||sx>=SIZE||sy>=SIZE)return false;const xx=Math.floor(sx),yy=Math.floor(sy);for(let oy=-2;oy<=2;oy++)for(let ox=-2;ox<=2;ox++){const px=xx+ox,py=yy+oy;if(px>=0&&px<SIZE&&py>=0&&py<SIZE&&r.mask[py*SIZE+px]>=40)return true;}return false;}
+window.RevierAnimalMotion={draw,configs,hit};
 })();
